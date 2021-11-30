@@ -1,6 +1,7 @@
 #ifndef HASHMAP_H
 #define HASHMAP_H
 
+// defines linked list struct
 struct llnode {
         char* word;
         char* document_id;
@@ -8,12 +9,14 @@ struct llnode {
         struct llnode* next;
 };
 
+// defines hashmap struct
 struct hashmap {
         struct llnode** map;
         int num_buckets;
         int num_elements;
 };
 
+// defines each function performed by a hashmap instance 
 struct hashmap* hm_create(int num_buckets);
 int hm_get(struct hashmap* hm, char* word, char* document_id);
 void hm_put(struct hashmap* hm, char* word, char* document_id, int num_occurrences);
