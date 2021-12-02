@@ -8,3 +8,8 @@ To do
 
 * Transfer notes to readme 
 
+* man pages
+* GDB, valgrind, make file, asserts
+
+
+* for each function for each parameter null check it 

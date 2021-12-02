@@ -18,10 +18,10 @@ struct hashmap {
 
 // defines each function performed by a hashmap instance 
 struct hashmap* hm_create(int num_buckets);
-int hm_get(struct hashmap* hm, char* word, char* document_id);
-void hm_put(struct hashmap* hm, char* word, char* document_id, int num_occurrences);
-void hm_remove(struct hashmap* hm, char* word, char* document,_id);
-void hm_destroy(struct hashmap* hm);
-int hash(struct hashmap* hm, char* word, char* document_id);
+//int hm_get(struct hashmap* hm, char* word, char* document_id);
+//void hm_put(struct hashmap* hm, char* word, char* document_id, int num_occurrences);
+//void hm_remove(struct hashmap* hm, char* word, char* document_id);
+//void hm_destroy(struct hashmap* hm);
+//int hash(struct hashmap* hm, char* word, char* document_id);
 
 #endif
