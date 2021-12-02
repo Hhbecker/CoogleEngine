@@ -1,8 +1,18 @@
 # CoogleEngine
 Meet Coogle: Henry's very own C implementation of a search engine.
 
+Hashmap vs Hashtable
+https://www.geeksforgeeks.org/differences-between-hashmap-and-hashtable-in-java/
+
+How I'll handle collisions: chaining
+
+Key = word+documentID asccii sum
+Value = number of occurences of the word in that document
+
 
 To do 
+* answer question at bottom of specs
+* ask how to run it on seas shell
 * improve lucid chart memory diagram
 
 * man pages
