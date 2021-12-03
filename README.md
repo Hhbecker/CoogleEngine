@@ -10,7 +10,7 @@ Key = word+documentID asccii sum
 Value = number of occurences of the word in that document
 
 
-To do 
+To Do 
 * answer question at bottom of specs
 * ask how to run it on seas shell
 * improve lucid chart memory diagram
