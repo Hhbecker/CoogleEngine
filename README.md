@@ -9,6 +9,8 @@ How I'll handle collisions: chaining
 Key = word+documentID asccii sum
 Value = number of occurences of the word in that document
 
+This hashmap will free memory automatically when nodes are removed to prevent memory leaks and maintain performance over time.
+
 
 To Do 
 * answer question at bottom of specs
@@ -29,10 +31,16 @@ To Do
 * use Strcmp = string compare 
 * write in some assembly directly into C to make it faster 
 
+* make a demo folder so people can clone the repo and search amongst given files (maybe integrate a java or python GUI)
+
 Questions
-* why would the number of occurences passed into hm_put ever be more than one?
-* what's the deal with this chaining thing - why wouldn't I just increment the num_occurences of the llnode struct?
+* how would I go about integrating a Java or Python GUI with this C code?
 * what is the point of the #define HASHMAP_H command at the top of the header file? It's a compiler thing - find out more 
+
+Why would the number of occurences passed into hm_put ever be more than one?
+the number of occurences passed into put is determined by calling get and incrementing the number of occurences returned
+
+Is chaining the linked list in a buckett design choice or is it overwriting num occurences 
 
 Each value is assigned a key
 The key is input into a hashing function which places the key in a bucket out of N buckets
