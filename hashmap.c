@@ -54,7 +54,6 @@ int hm_get(struct hashmap* hm, char* word, char* document_id){
         else{
             // create a llnode pointer and assign it to hm->map[index] which is pointing to the first node in the list
             struct llnode* tempPTR = hm->map[index];
-            struct llnode* trailingPTR = hm->map[index];
            
             while(tempPTR){
             //compare word string and docID
@@ -63,7 +62,6 @@ int hm_get(struct hashmap* hm, char* word, char* document_id){
                     return tempPTR->num_occurrences; 
                 }
                 else{
-                    trailingPTR = tempPTR;
                     tempPTR = tempPTR->next;
                     printf("This node key did not match the query key, checking next node..\n");
                 }
