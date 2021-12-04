@@ -19,19 +19,8 @@ int main(void){
     // figure out how to scan through each word in doc
     // call get and put on each word
 
-    // Testing hm_create
-    // •does it return the correct structure with the correct number of buckets 
+    ////////////////////////////////////////////////////////////////////////////////////
 
-    // Testing hash
-    // •
-
-    // Testing put
-    // •can you add a node to an empty list and to a not empty list
-    // •can you overwrite the num_occurences if the key is already present
-
-    // Testing get 
-    // •can you can find node in beginning, middle, and end of a list
-    // •will get return -1 if its not present
 
 
 
@@ -60,7 +49,20 @@ int main(void){
 
     int occurrences = hm_get(mapPTR, wordPTR, docidPTR);
 
-    printf("num occurences = %d", occurrences);
+    printf("num occurences = %d\n", occurrences);
+
+    hm_remove(mapPTR, wordPTR, docidPTR);
+
+    occurrences = hm_get(mapPTR, wordPTR, docidPTR);
+
+    printf("num occurences = %d\n", occurrences);
+
+    hm_destroy(mapPTR);
+
+    occurrences = hm_get(mapPTR, wordPTR, docidPTR);
+
+
+
     
         return 0;
 }

@@ -245,7 +245,7 @@ void hm_remove(struct hashmap* hm, char* word, char* document_id){
                     }
 
                     ///////////////////////////////////////
-
+                    hm->num_elements--;
                     return;
                 }
                 else{
@@ -269,38 +269,37 @@ void hm_remove(struct hashmap* hm, char* word, char* document_id){
 }
 
 
-// void hm_destroy(struct hashmap* hm){
+void hm_destroy(struct hashmap* hm){
 
-//     if(hm){ // hm pointer is not nULL
+    if(hm){ // hm pointer is not nULL
         
-        
-//         for(int i=0; i<hm->num_buckets; i++){
+        for(int i=0; i<hm->num_buckets; i++){
 
-//             if(hm->map[i]){ // this bucket has a linked list
-//                 struct llnode* PTR = hm->map[i];
-//                 struct llnode* trailingPTR = hm->map[i];
+            if(hm->map[i]){ // this bucket has a linked list
+                struct llnode* PTR = hm->map[i];
+                struct llnode* trailingPTR = hm->map[i];
 
-//                 while(PTR){
-//                     //set PTR to next node or NULL
-//                     PTR = PTR->next;
-//                     // free node
-//                     free(trailingPTR->word);
-//                     free(trailingPTR->document_id);
-//                     free(trailingPTR);
-//                     // move trailing PTR up the list
-//                     trailingPTR = PTR;
-//                 }
+                while(PTR){
+                    //set PTR to next node or NULL
+                    PTR = PTR->next;
+                    // free node
+                    free(trailingPTR->word);
+                    free(trailingPTR->document_id);
+                    free(trailingPTR);
+                    // move trailing PTR up the list
+                    trailingPTR = PTR;
+                }
 
-//             }
-//         }
+            }
+        }
 
-//         // free array of pointers
-//         free(hm->map);
-//         free(hm);
-//     }
-//     else{
-//         printf("Attempting to pass invalid parameters into hm_destroy: returning\n");
-//         return;
-//     }
+        // free array of pointers
+        free(hm->map);
+        free(hm);
+    }
+    else{
+        printf("Attempting to pass invalid parameters into hm_destroy: returning\n");
+        return;
+    }
 
-// }
+}
