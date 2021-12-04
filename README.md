@@ -47,3 +47,70 @@ The key is input into a hashing function which places the key in a bucket out of
 The key value pair is then added to the end of the linked list at that bucket
 
 A collision, or more specifically, a hash code collision in a HashMap, is a situation where two or more key objects produce the same final hash value and hence point to the same bucket location or array index.
+
+
+## Testing the hashmap
+
+* does each method handle NULL and invalid parameters properly?
+* does each method perform as intended? 
+* are there any memory leaks?
+* does the test suite work on the SEAS shell?
+
+### struct hashmap* hm_create(int num_buckets);
+* input of negative or zero buckets must return NULL pointer
+
+### int hash(struct hashmap* hm, char* word, char* document_id);  
+* input of null pointer must print warning message and return -1
+
+### int hm_get(struct hashmap* hm, char* word, char* document_id);
+* input of NULL pointer must return -1
+* input of word and docID not in hashmap must return -1
+* input of word and docID found in hashmap must return 1 or greater
+
+### void hm_put(struct hashmap* hm, char* word, char* document_id, int num_occurrences);
+* input of NULL pointer must return with a warning message
+* input of negative num_occurences must return with a warning message 
+
+Three put cases:
+1. list not initialized 
+2. adding item to rear of existing list
+3. overwriting num occurences in an existing node
+
+### void hm_remove(struct hashmap* hm, char* word, char* document_id);
+* input of null pointer must return with a warning message 
+
+Six remove cases:
+1. List uninitialized
+2. Target node is not found (list is present).
+3. Target node is the only node in the list.
+4. Target node is the first node but has nodes after it.
+5. Target node is not first but has no nodes after it.
+6. Target node is in between two nodes.
+
+### void hm_destroy(struct hashmap* hm);
+* input of null pointer should print warning message and return
+* input of valid pointer should free all associated memory 
+
+1. linked lists uninitialized
+2. one or more linked lists initialized 
+
+///////////////////////////////////////////////////////////////////////
+
+
+    // Testing hm_create
+    // •does it return the correct structure with the correct number of buckets 
+
+    // Testing hash
+    // •
+
+    // Testing put
+    // •can you add a node to an empty list and to a not empty list
+    // •can you overwrite the num_occurences if the key is already present
+
+    // Testing get 
+    // •can you can find node in beginning, middle, and end of a list
+    // •will get return -1 if its not present
+
+    // Testing remove
+
+    // Testing destroy
