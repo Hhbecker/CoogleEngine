@@ -59,7 +59,7 @@ int main(void){
 
     hm_destroy(mapPTR);
 
-    occurrences = hm_get(mapPTR, wordPTR, docidPTR);
+    //occurrences = hm_get(mapPTR, wordPTR, docidPTR);
 
 
 

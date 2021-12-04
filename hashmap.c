@@ -44,7 +44,7 @@ struct hashmap* hm_create(int num_buckets){
 // returns: returns num_occurences if key found, returns -1 if key not found
 int hm_get(struct hashmap* hm, char* word, char* document_id){
    // null check parameter pointers
-   if(hm && word && document_id){
+   if(hm && word && document_id && hm->map){
 
         int index = hash(hm, word, document_id);
         
@@ -87,7 +87,7 @@ void hm_put(struct hashmap* hm, char* word, char* document_id, int num_occurrenc
     printf("You are trying to add a KVP with num_occerences less than 1! Returning now\n");
         return;
     }
-    if(hm && word && document_id){
+    if(hm && word && document_id && hm->map){
 
         //call hash function on word and docID 
         int index = hash(hm, word, document_id);
@@ -164,7 +164,7 @@ void hm_put(struct hashmap* hm, char* word, char* document_id, int num_occurrenc
 // returns: 
 int hash(struct hashmap* hm, char* word, char* document_id){
     // Null check parameters
-    if(hm && word && document_id){
+    if(hm && word && document_id && hm->map){
         // printf("You have valid parameters! Counting ASCII\n");
         // add the ascii values of the word and the docID and modulo by the number of buckets
         int ascii = 0;
@@ -192,10 +192,9 @@ int hash(struct hashmap* hm, char* word, char* document_id){
 // returns: void
 void hm_remove(struct hashmap* hm, char* word, char* document_id){
 
-    if(hm && word && document_id){
+    if(hm && word && document_id && hm->map){
 
         int index = hash(hm, word, document_id);
-        printf("Hash value equals %d\n", index);
 
         // if bucket doesn't have a linked list return 
         if(!hm->map[index]){
@@ -210,20 +209,18 @@ void hm_remove(struct hashmap* hm, char* word, char* document_id){
             //compare word string and docID
                 if( (strcmp(PTR->document_id, document_id) == 0) && (strcmp(PTR->word, word) == 0) ){
 
-                    //////////////////////////////////////
-
                     if (PTR==trailingPTR) // the target node is first in the list
                     {
                             if (PTR->next) // the target node has a node following it
                             {
-                                hm->map[index	] = PTR->next;
+                                hm->map[index] = PTR->next;
                                 free(PTR->word);
                                 free(PTR->document_id);
                                 free(PTR);
                             }
                             else // the target node is the only element in the list
                             {
-                                hm->map[index	] = NULL;
+                                hm->map[index] = NULL;
                                 free(PTR->word);
                                 free(PTR->document_id);
                                 free(PTR);
@@ -246,8 +243,8 @@ void hm_remove(struct hashmap* hm, char* word, char* document_id){
                                 free(PTR);
                             }
                     }
-
-                    ///////////////////////////////////////
+                    word = NULL;
+                    document_id = NULL;
                     hm->num_elements--;
                     return;
                 }
@@ -259,15 +256,11 @@ void hm_remove(struct hashmap* hm, char* word, char* document_id){
             printf("Item in hm_remove call does not exist: returning\n");
             return;
         }
-
-
-
     }
     else{
         printf("Attempting to pass invalid parameters into hm_remove: returning\n");
         return;
     }
-
 
 }
 
@@ -276,7 +269,7 @@ void hm_remove(struct hashmap* hm, char* word, char* document_id){
 //returns: void
 void hm_destroy(struct hashmap* hm){
 
-    if(hm){ // hm pointer is not nULL
+    if(hm && hm->map){ // hm pointer is not NULL
         
         for(int i=0; i<hm->num_buckets; i++){
 
@@ -294,12 +287,14 @@ void hm_destroy(struct hashmap* hm){
                     // move trailing PTR up the list
                     trailingPTR = PTR;
                 }
+                //hm->map[i] = NULL;
 
             }
         }
 
         // free array of pointers
         free(hm->map);
+        hm->map = NULL;
         free(hm);
     }
     else{
