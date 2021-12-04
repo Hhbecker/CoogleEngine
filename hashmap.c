@@ -66,11 +66,9 @@ int hm_get(struct hashmap* hm, char* word, char* document_id){
                     printf("This node key did not match the query key, checking next node..\n");
                 }
             }
-
             printf("KVP not found in hashmap, returning -1\n");
             return -1;
         }
-
    }
    else{
        printf("Attempting to pass invalid parameters into hm_get: returning -1\n");
