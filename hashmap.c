@@ -187,6 +187,9 @@ int hash(struct hashmap* hm, char* word, char* document_id){
 
 }
 
+// remove: frees all memory allocated for linked list node and reconnects the list if necessary
+// input: pointer to hashmap struct, pointers to the node key
+// returns: void
 void hm_remove(struct hashmap* hm, char* word, char* document_id){
 
     if(hm && word && document_id){
@@ -268,7 +271,9 @@ void hm_remove(struct hashmap* hm, char* word, char* document_id){
 
 }
 
-
+//destroy: frees all memory allocated by hashmap
+// input: pointer to hashmap struct
+//returns: void
 void hm_destroy(struct hashmap* hm){
 
     if(hm){ // hm pointer is not nULL
