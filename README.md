@@ -147,9 +147,9 @@ A formal description of the search problem:
 * create a documentation where you specify the assumptions you made and what hash function you used etc
 
 #### Necessary functions
-int hash(char* word){
-    // hashes word to a bucket
-}
+    int hash(char* word){
+        // hashes word to a bucket
+    }
 
 void hash_table_insert(char* word, char* docID){
     // hashes word and creates new node for the word or updates existing document frequency for that word and document combo
