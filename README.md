@@ -151,38 +151,38 @@ A formal description of the search problem:
         // hashes word to a bucket
     }
 
-void hash_table_insert(char* word, char* docID){
-    // hashes word and creates new node for the word or updates existing document frequency for that word and document combo
-}
+    void hash_table_insert(char* word, char* docID){
+        // hashes word and creates new node for the word or updates existing document frequency for that word and document combo
+    }
 
-void training(set of documents){
-    returns the populated hash table as output
-}
+    void training(set of documents){
+        returns the populated hash table as output
+    }
 
-void read_query() {
-    read the search query from the command line
-}
+    void read_query() {
+        read the search query from the command line
+    }
 
-void rank() {
-    // computes the score for each document based on DF-IDF rank of search query
-    // must also determine if there is no document with a match (if none of the words in the search query appear in any of the documents)
-}
+    void rank() {
+        // computes the score for each document based on DF-IDF rank of search query
+        // must also determine if there is no document with a match (if none of the words in the search query appear in any of the documents)
+    }
 
-void stop_word(){
-    // identifies and removes stop words from hashmap
-} 
+    void stop_word(){
+        // identifies and removes stop words from hashmap
+    } 
 
-int main(){
-    // first prompts user for number of hashtable buckets 
-    // calls the training method to create and fill hashtable 
+    int main(){
+        // first prompts user for number of hashtable buckets 
+        // calls the training method to create and fill hashtable 
 
-    // next prompt user for search query of x for exit 
-    // “Enter Search String or X to Exit”
-    // if X exit program
-    // if not X call read_query function 
-    // compute ranking and print outputs
-    // return back to prompt “Enter Search String or X to Exit”
-}
+        // next prompt user for search query of x for exit 
+        // “Enter Search String or X to Exit”
+        // if X exit program
+        // if not X call read_query function 
+        // compute ranking and print outputs
+        // return back to prompt “Enter Search String or X to Exit”
+    }
   
 makefile
 * make sure that everything compiles correctly on the SEAS shell by evoking "make" with no arguments
