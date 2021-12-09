@@ -5,24 +5,14 @@
 
 int main(void){
 
+ // Workflow:
     // iterate through the list of documents
-    // for each document iterate through each word 
-    // pass each word with the docID into the get function
-    
-
-    // Workflow:
+    // for each document, iterate through each word 
     // 1. First call get on a word which will return the number of occuerences of that word in the map
     // 2. If  -the value is -1 pass 1 into the put method with the key as a parameter 
     //        -the value is > 0 increment it and pass that number into the put method with the key as a parameter
 
-    // create the 3 text documents 
-    // figure out how to scan through each word in doc
-    // call get and put on each word
-
     ////////////////////////////////////////////////////////////////////////////////////
-
-
-
 
     // declare a pointer to a hashmap struct 
     struct hashmap* mapPTR;
@@ -61,8 +51,33 @@ int main(void){
 
     //occurrences = hm_get(mapPTR, wordPTR, docidPTR);
 
+// 1. Pass NULL and invalid parameters into each function
 
 
+
+// 2. Create a hashmap with 6 buckets
+
+// Three put cases:
+// 1. list not initialized 
+// 2. adding item to rear of existing list
+// 3. overwriting num occurences in an existing node
+
+// Five get cases 
+// 1. list not initialized 
+// 2. list initialized but item not present (return -1)
+// 3. list initialized and item at front of list 
+// 4. list initialized and item in between two nodes
+// 5. list initialized and item at rear of list
+
+// Six remove cases:
+// 1. List uninitialized
+// 2. Target node is not found (list is present).
+// 3. Target node is the only node in the list.
+// 4. Target node is the first node but has nodes after it.
+// 5. Target node is not first but has no nodes after it.
+// 6. Target node is in between two nodes.
+
+// Remake list to test destroy 
     
-        return 0;
+    return 0;
 }

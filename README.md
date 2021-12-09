@@ -13,9 +13,11 @@ This hashmap will free memory automatically when nodes are removed to prevent me
 
 
 To Do 
-* answer question at bottom of specs
-* ask how to run it on seas shell
-* improve lucid chart memory diagram
+* read through specs and powerpoint on project 5
+* make testing suite that uses fileIO to accomplish operations that search engine would need (test each scenario layed out below for each method)
+
+* compare this algorithm to page rank algorithm
+
 
 * in put method: efficiency gain by adding new node to front instead of back? 
 
@@ -70,8 +72,13 @@ In C, pointers are passed by value meaning a copy of the value is made and that 
 
 ### int hm_get(struct hashmap* hm, char* word, char* document_id);
 * input of NULL pointer must return -1
-* input of word and docID not in hashmap must return -1
-* input of word and docID found in hashmap must return 1 or greater
+
+Five get cases 
+1. list not initialized 
+2. list initialized but item not present (return -1)
+3. list initialized and item at front of list 
+4. list initialized and item in between two nodes
+5. list initialized and item at rear of list
 
 ### void hm_put(struct hashmap* hm, char* word, char* document_id, int num_occurrences);
 * input of NULL pointer must return with a warning message
