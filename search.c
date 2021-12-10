@@ -24,6 +24,9 @@ int main() {
         size_t lnSize = 0;
 
         lnSize = getline(&input, &length, stdin); 
+        if(lnSize){
+            // to avoid error: variable ‘lnSize’ set but not used
+        }
 
         charBuckets = strtok(input, "\n");
     }
@@ -42,6 +45,9 @@ int main() {
         size_t lineSize = 0;
 
         lineSize = getline(&line, &len, stdin); 
+        if(lineSize){
+            // to avoid error: variable ‘lineSize’ set but not used
+        }
 
         directory = strtok(line, "\n");
     }
