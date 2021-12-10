@@ -11,19 +11,9 @@ int main() {
     // skips user prompts for easy testing
     bool debug = true;
 
-    // STEPS
-    // prompt user for num buckets
-    // initialize hashmap with that many buckets
-    // prompt user for search string 
-    // read in search string (example search string: "p5docs/*.txt")
-    // pass search string into glob 
-    // iterate through this array of file pointers 
-    // open each file, add each word to hashmap, and close each file
-
+    // 1. prompt user for number of buckets and save it as a string
+    char* charBuckets;
     printf("How many buckets?: ");
-
-        char* charBuckets;
-
     if(debug){
         charBuckets = "15";
     }
@@ -38,11 +28,10 @@ int main() {
         charBuckets = strtok(input, "\n");
     }
 
+    // 2. prompt user for directory to be searched and save it as a string
+    char* directory;
     printf("Please specify the directory and document type you would like to search:\n");
     printf("Example: 'p5docs/*.txt'\n");
-
-    char* directory;
-
     if(debug){
         directory = "p5docs/*.txt";
     }
@@ -57,10 +46,13 @@ int main() {
         directory = strtok(line, "\n");
     }
 
-    // create pointer to hashmap struct
+    // 3. create pointer to hashmap struct
     struct hashmap* mapStructPtr;
+
+    // 4. call training method
     mapStructPtr = training(directory, charBuckets);
  
+    // 5. prompt user for search query and save it as a string
 
     // For reading in a line of words (word search query)
 
