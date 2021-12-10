@@ -1,23 +1,33 @@
 #ifndef HASHMAP_H
 #define HASHMAP_H
+// prevent body of this file from being included more than once by linker
 
-// defines linked list struct
-struct llnode {
+// defines document linked list struct
+struct docNode {
+        int docID;
+        int numOccurences;
+        struct docNode* nextDoc; 
+};
+
+// defines word linked list struct
+struct wordNode {
         char* word;
-        char* document_id;
-        int num_occurrences;
-        struct llnode* next;
+        int df;
+        struct wordNode* nextWord;
+        struct docNode* docs;
 };
 
 // defines hashmap struct
 struct hashmap {
-        struct llnode** map;
+        struct wordNode** pointerArray;
         int num_buckets;
         int num_elements;
 };
 
 // defines each function performed by a hashmap instance 
 // this acts as an interface that is then implemented in another file
+struct hashmap* training(char* directory, char* charBuckets );
+void hash_table_insert(struct hashmap* hashmapPtr, char* word, int docID);
 struct hashmap* hm_create(int num_buckets);
 int hm_get(struct hashmap* hm, char* word, char* document_id);
 void hm_put(struct hashmap* hm, char* word, char* document_id, int num_occurrences);
