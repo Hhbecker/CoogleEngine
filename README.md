@@ -211,10 +211,9 @@ The document rank for a single word of the search query = TF*IDF
 The overall document rank for all words in the search query is the sum of ranks for individual words
 
 Jonathan's office hours to do list
-* figure out how to read hardcoded documents
+* what should the code file (files?) be named?
 * figure out glob function for reading n documents 
 * figure out makefile 
-
 
     To do 
     * create flowchart
@@ -245,3 +244,10 @@ References: Some references for more information on tf-idf method for document r
 ● H. Wu and R. Luk and K. Wong and K. Kwok. "Interpreting TF-IDF term weights as making relevance
 decisions". ACM Transactions on Information Systems, 26 (3). 2008.
 ● J. Ramos, “Using TF-IDF to determine word relevance in document queries”.
+
+
+
+Testing new hashmap
+-invalid directory
+-no files in directory
+--files are blank
