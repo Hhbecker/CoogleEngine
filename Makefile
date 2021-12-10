@@ -1,26 +1,17 @@
-.PHONY: clean build all
 
-# compilation settings
-CC = gcc
-CFLAGS = -I$(INCLUDE_DIR) -Wall -Wextra -Werror -pedantic -std=gnu99 -pedantic -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition -g
+# each time search.c or hashmap.c are changed recompile the two into an executable called search
+# makefile only recompiles files that have changed since the last executable was created
 
-# directory paths
-INCLUDE_DIR = ./
-SRC_DIR = ./
-OBJ_DIR = ./
+all: search.o hashmap.o
+	gcc search.o hashmap.o -o search
 
-# file lists
-CFILES = hashmap.c test.c
-OBJS = hashmap.o test.o
+search.o: search.c
+	gcc -c search.c
 
-# binary
-BIN = test
-
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) -o $@ -c $<
-
-$(BIN): $(OBJS)
-	$(CC) -o $@ $(OBJS)
+hashmap.o: hashmap.c hashmap.h
+	gcc -c hashmap.c
 
 clean:
-	rm -f $(OBJS) $(BIN) *~
+	rm *.o search 
+
+
