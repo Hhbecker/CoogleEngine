@@ -7,7 +7,7 @@
 #include <assert.h>
 
 
-int main() {
+int main(void) {
     // skips user prompts for easy testing
     bool debug = true;
 
@@ -57,6 +57,10 @@ int main() {
 
     // 4. call training method
     mapStructPtr = training(directory, charBuckets);
+
+    if(mapStructPtr){
+        // to avoid error: variable ‘mapStructPtr’ set but not used
+    }
  
     // 5. prompt user for search query and save it as a string
 

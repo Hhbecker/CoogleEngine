@@ -60,7 +60,7 @@ struct hashmap* training(char* directory, char* charBuckets ){
         while(fscanf(filePtr, "%s", buf)==1){
             // the buf variable contains the character string of the next word being scanned in
             printf("File: %s, word:'%s'\n", result.gl_pathv[i], buf);
-            //hash_table_insert(hashmapPtr, buf, i);
+            hash_table_insert(hashmapPtr, buf, i);
         }
 
         // close the file to flush the buffer 
@@ -101,60 +101,56 @@ struct hashmap* hm_create(int num_buckets){
 
 }
 
-// hash_table_insert
+// hash_table_insert: hashes word and creates new node for the word or updates existing document frequency for that word and document combo
+
 // input:
 // returns:
-//void hash_table_insert(struct hashmap* hashmapPtr, char* word, int docID){
-    // hashes word and creates new node for the word or updates existing document frequency for that word and document combo
+void hash_table_insert(struct hashmap* hm, char* word, int docID){
 
     // 1. null check 
+    if(!(hm) || !(word)){
+        printf("passing NULL pointers into insert function: returning\n");
+        return;
+    }
+    if(docID<0){
+        printf("docID can't be less than 0: returning\n");
+        return;
+    }
 
     // 2. hash 
+    int index = hash(hm, word, docID);
 
     // 3. several different insert cases 
 
-//}
+        // if KVP is found overwrite occurence count 
+        // if KVP is not found:
+        // • malloc space for a new node
+        // • set next pointer of previous node to new node
+        // • set next pointer of new node to null
+        // • allocate space for word and doc ID strings (strdup does this automatically)
+        // • increment num_elements in hashmap
 
-// // hm_put: adds a given key value pair into the hashmap
-// // input: pointer to hashmap struct, pointer to word and doc id, number of occurences 
-// // returns: void
-// void hm_put(struct hashmap* hm, char* word, char* document_id, int num_occurrences){
-//     if(num_occurrences<1){
-//     printf("You are trying to add a KVP with num_occerences less than 1! Returning now\n");
-//         return;
-//     }
-//     if(hm && word && document_id && hm->map){
+        // 1. list not initialized
+        if(!hm->pointerArray[index]){
+            printf("Linked list in bucket %d not initialized, creating first node now\n", index);
+            // allocate space for a new word node 
+            hm->pointerArray[index] = (struct wordNode*) malloc(sizeof(struct wordNode));
+            // copy word into llnode (strdup automatically allocates space for the duplicate string) 
+            hm->pointerArray[index]->word = strdup(word);
+            // set next pointer of llnode to NULL
+            hm->pointerArray[index]->next = NULL;
+            // allocate space for docNode
+            hm->pointerArray[index]->docList = 
 
-//         //call hash function on word and docID 
-//         int index = hash(hm, word, document_id);
-//         printf("Hash value equals %d\n", index);
 
-//         // if KVP is found overwrite occurence count 
-//         // if KVP is not found:
-//         // • malloc space for a new node
-//         // • set next pointer of previous node to new node
-//         // • set next pointer of new node to null
-//         // • allocate space for word and doc ID strings (strdup does this automatically)
-//         // • increment num_elements in hashmap
 
-//         // 1. list not initialized
-//         if(!hm->map[index]){
-//             printf("Linked list in bucket %d not initialized, creating first node now\n", index);
-//             // allocate space for a new node 
-//             hm->map[index] = (struct llnode*) malloc(sizeof(struct llnode));
-//             printf("succesful malloc bub\n");
-
-//             // copy word into llnode (strdup automatically allocates space for the duplicate string) 
-//             hm->map[index]->word = strdup(word);
-//             // copy doc ID into llnode
-//             hm->map[index]->document_id = strdup(document_id);
-//             // set next pointer of llnode to NULL
-//             hm->map[index]->next = NULL;
-//             //increment num elements 
-//             hm->num_elements++;
+            //increment num elements 
+            hm->num_elements++;
             
-//             return;
-//         }
+            return;
+        }
+
+
 //         // 2. list is initialized item found
 //         else{
 //             // create a llnode pointer and assign it to hm->map[index] which is pointing to the first node in the list
@@ -189,18 +185,15 @@ struct hashmap* hm_create(int num_buckets){
 //                 return;
 //         }
 //     }
-//     else{
-//         printf("Attempting to pass invalid parameters into hm_put: returning\n");
-//         return;
-//     }
-// }
+
+}
 
 // hash: sums ascii characters to assign word and doc ID to a bucket
 // input: pointer to hashmap struct, pointer to a word, pointer to a doc ID
 // returns: 
-int hash(struct hashmap* hm, char* word, char* document_id){
+int hash(struct hashmap* hm, char* word, int document_id){
     // Null check parameters
-    if(hm && word && document_id && hm->pointerArray){
+    if(hm && word && hm->pointerArray){
         // printf("You have valid parameters! Counting ASCII\n");
         // add the ascii values of the word and the docID and modulo by the number of buckets
         int ascii = 0;
@@ -209,9 +202,7 @@ int hash(struct hashmap* hm, char* word, char* document_id){
             ascii = ascii + ((int) word[i]);
         }
         // count docID ascii
-        for(int i=0; i< (int) strlen(document_id); i++){
-            ascii = ascii + ((int) document_id[i]);
-        }
+            ascii = ascii + document_id;
 
         // modulo by number of buckets
         return (ascii) % (hm->num_buckets);
