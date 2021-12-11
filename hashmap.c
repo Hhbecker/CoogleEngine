@@ -51,8 +51,7 @@ struct hashmap* training(char* directory, char* charBuckets ){
     struct hashmap* hashmapPtr = hm_create(numBuckets);
 
     // 6. iterate through words in documents and call hash_table_insert
-    // change back to i<numFiles
-    for(int i=0; i<1; i++){
+    for(int i=0; i<numFiles; i++){
         // create file pointer from file name char string
         FILE* filePtr = fopen(result.gl_pathv[i], "r"); // result.gl_pathv is an array of file names
 
@@ -70,8 +69,147 @@ struct hashmap* training(char* directory, char* charBuckets ){
         int fclose(FILE *filePtr);
     }
 
+    // 8. Remove stop words
+    stop_word(hashmapPtr, numFiles);  
+
     return hashmapPtr;
 }
+
+void stop_word(struct hashmap* hm, int numFiles){
+
+    // Null check
+    if(!hm){
+        printf("passing NULL pointer into calculateIDF: returning\n");
+        return;
+    }
+
+    // iterate through each bucket
+    for(int i=0; i<hm->num_buckets; i++){
+
+        // if bucket has a linked list
+        if(hm->pointerArray[i]){ // this bucket has a linked list
+            struct wordNode* Ptr = hm->pointerArray[i];
+            struct wordNode* trailingPtr = hm->pointerArray[i];
+
+            if(trailingPtr){
+                // to avoid unused error
+            }
+
+            while(Ptr){
+                // compare docFrequency to numFiles
+                if(Ptr->docFrequency == numFiles){
+                    printf("word %s found in all files: calling remove\n", Ptr->word);
+                    removeWord(hm, trailingPtr, Ptr);
+                    Ptr = trailingPtr->nextWord;
+                }
+                else{
+                    trailingPtr = Ptr;
+                    Ptr=Ptr->nextWord;
+                }
+
+            }
+        }
+    }
+
+}
+
+
+// remove: frees all memory allocated for linked list node and reconnects the list if necessary
+// input: pointer to hashmap struct, pointers to the node key
+// returns: void
+void removeWord(struct hashmap* hm, struct wordNode* trailingPtr, struct wordNode* Ptr){
+        // old parameters: struct hashmap* hm, char* word, char* document_id
+    if(!(trailingPtr || Ptr)){
+        printf("Passing NULL pointers into remove: returning\n");
+    }
+        
+    if (Ptr==trailingPtr) // the target node is first in the list
+    {
+        int index=hash(hm->num_buckets, Ptr->word);
+
+            if (Ptr->nextWord) // the target node has a node following it
+            {
+                printf("Target node is first with nodes after it\n");
+                hm->pointerArray[index] = Ptr->nextWord;
+                freeWord(Ptr);
+                free(Ptr);
+            }
+            else // the target node is the only element in the list
+            {
+                printf("Target node is the only node in list\n");
+                hm->pointerArray[index] = NULL;
+                freeWord(Ptr);
+                free(Ptr);
+            }
+    }	
+    else // the target node is not first in the list
+    {
+            if (Ptr->nextWord) // the target node is in between two nodes
+            {
+                printf("Target node is between nodes\n");
+                trailingPtr->nextWord = Ptr->nextWord;
+                freeWord(Ptr);
+                free(Ptr);
+            }
+            else // the target node is at the end of the list
+            {
+                printf("Target node is end of list\n");
+                trailingPtr->nextWord = NULL;
+                freeWord(Ptr);
+                free(Ptr);
+            }
+    }
+    return;
+}
+
+void freeWord(struct wordNode* wordPtr){
+    printf("\nInside freeWord\n\n");
+    // 1. walk down document list and free each document struct
+    if(!wordPtr->docList){
+        printf("freeing word node without doc list: something's wrong\n");
+        return;
+
+    }
+    else{
+        struct docNode* docPtr = wordPtr->docList;
+        struct docNode* trailingPtr = docPtr;
+
+        while(docPtr){
+            //set PTR to next node or NULL
+            docPtr = docPtr->nextDoc;
+            // free node
+            if(trailingPtr->tfidf){
+                free(trailingPtr->tfidf);
+            }
+            free(trailingPtr);
+            // move trailing PTR up the list
+            trailingPtr = docPtr;
+        }
+
+    }
+
+    printf("\nDoc list freed\n");
+
+    // 2. free each necessary word struct data
+    // free word string
+    free(wordPtr->word);
+    wordPtr->nextWord = NULL; 
+
+    return;
+}
+
+
+
+// double tfidf(struct wordNode* wordPtr, int docID){
+//     if(wordNode->docList->tfid){
+//         return tfidf
+//     }
+//     else{
+//         double* tfidf = (double*) malloc(sizeof(double));
+//     }
+// }
+
+
 
 // hm_create: allocates space for a new hashmap struct using the specified number of buckets
 // input: number of buckets in the hashmap
@@ -121,9 +259,8 @@ void hash_table_insert(struct hashmap* hm, char* word, int docID){
     }
 
     // 2. hash 
-    int index = hash(hm, word, docID);
+    int index = hash(hm->num_buckets, word);
     printf("hash index = %d\n", index);
-
 
     // returns pointer to a wordNode containing the word just passed into insert
     struct wordNode* wordPtr = findWord(hm, index, word, 1); // 1 for insert mode
@@ -150,18 +287,21 @@ void addDoc(struct wordNode* wordPtr, int docID){
     }
     // 1. docList not initialized
     if(!wordPtr->docList){
+        printf("word '%s' does not have a docList - initializing now\n", wordPtr->word);
         // allocate space for docNode
         wordPtr->docList = (struct docNode*) malloc (sizeof(struct docNode));
         // set docID
         wordPtr->docList->docID = docID;
         // set num occurences to 1
-        wordPtr->docList->numOccurences = 1;
+        wordPtr->docList->termFrequency = 1;
+        // set tf-idf pointer to NULL
+        wordPtr->docList->tfidf = NULL;
         // set nextDoc to NULL
         wordPtr->docList->nextDoc = NULL;
-        // increment word df 
-        wordPtr->df++;
-        if(wordPtr->df != 1){
-            printf("word df not 1 after initializing docList so something's wrong\n");
+        // increment word docFrequency 
+        wordPtr->docFrequency++;
+        if(wordPtr->docFrequency != 1){
+            printf("word docFrequency not 1 after initializing docList so something's wrong\n");
         }
     }
     // 2. docList initialized doc found
@@ -179,7 +319,7 @@ void addDoc(struct wordNode* wordPtr, int docID){
             if(tempPTR->docID == docID){ 
                 printf("Doc found in docList, incrementing occurences\n");
                 // increment numOccurences
-                tempPTR->numOccurences++;
+                tempPTR->termFrequency++;
                 return;
             }
             else{
@@ -196,11 +336,13 @@ void addDoc(struct wordNode* wordPtr, int docID){
         // set docID  
         newNodePTR->docID = docID;
         // set document frequency to 1
-        newNodePTR->numOccurences = 1;
+        newNodePTR->termFrequency = 1;
+        // set tf-idf pointer to NULL
+        wordPtr->docList->tfidf = NULL;
         // set next pointer of doc node to NULL
         newNodePTR->nextDoc = NULL;
-        // increase word df
-        wordPtr->df++;
+        // increase word docFrequency
+        wordPtr->docFrequency++;
         return;
     }
 
@@ -223,8 +365,8 @@ struct wordNode* findWord(struct hashmap* hm, int index, char* word, int insertM
             hm->pointerArray[index] = (struct wordNode*) malloc(sizeof(struct wordNode));
             // copy word into word node (strdup automatically allocates space for the duplicate string) 
             hm->pointerArray[index]->word = strdup(word);
-            // set df to 1
-            hm->pointerArray[index]->df = 0;
+            // set docFrequency to 1
+            hm->pointerArray[index]->docFrequency = 0;
             // set next pointer of llnode to NULL
             hm->pointerArray[index]->nextWord = NULL;
             // set docList to NULL
@@ -270,7 +412,7 @@ struct wordNode* findWord(struct hashmap* hm, int index, char* word, int insertM
             // copy word into word node  
             newNodePTR->word = strdup(word);
             // set document frequency to 1
-            newNodePTR->df = 1;
+            newNodePTR->docFrequency = 0;
             // set next pointer of word node to NULL
             newNodePTR->nextWord = NULL;
             // set docList pointer to null
@@ -287,9 +429,9 @@ struct wordNode* findWord(struct hashmap* hm, int index, char* word, int insertM
 // hash: sums ascii characters to assign word and doc ID to a bucket
 // input: pointer to hashmap struct, pointer to a word, pointer to a doc ID
 // returns: 
-int hash(struct hashmap* hm, char* word, int document_id){
+int hash(int numBuckets, char* word){
     // Null check parameters
-    if(hm && word && hm->pointerArray){
+    if(word){
         // printf("You have valid parameters! Counting ASCII\n");
         // add the ascii values of the word and the docID and modulo by the number of buckets
         int ascii = 0;
@@ -297,11 +439,8 @@ int hash(struct hashmap* hm, char* word, int document_id){
         for(int i=0; i< (int) strlen(word); i++){
             ascii = ascii + ((int) word[i]);
         }
-        // count docID ascii
-            ascii = ascii + document_id;
-
         // modulo by number of buckets
-        return (ascii) % (hm->num_buckets);
+        return (ascii) % (numBuckets);
     }
     else{
         printf("Attempting to pass invalid parameters into hash: returning -1\n");
@@ -310,4 +449,76 @@ int hash(struct hashmap* hm, char* word, int document_id){
 
 }
 
+
+char** read_query(void){
+    // prompt user for search query
+    printf("Enter search string or X to exit: ");
+
+    char* queryLine = NULL;
+    size_t queryLength = 0;
+    size_t queryLineSize = 0;
+
+    queryLineSize = getline(&queryLine, &queryLength, stdin); 
+
+    printf("Whole line: %s\n", queryLine);
+    printf("Query length: %d\n", (int) queryLineSize);
+
+    int spaces = 0;
+        for(int i=0; queryLine[i]!='\0'; i++){
+            if(queryLine[i] == ' '){
+                spaces++;
+            
+            }
+            printf("%c\n", queryLine[i]);
+        }
+    printf("Spaces: %d\n", spaces);
+
+    char* queryToken = strtok(queryLine, " ");
+
+    // maximum word length in query is 20 chars
+    char queryArray[spaces+1][20];
+
+    if(queryArray[0]){
+
+    }
+
+    int count = 0;
+    while(queryToken != NULL){
+         printf("Entering '%s' into query array\n", queryToken);
+         //queryArray[count] = queryToken; 
+         queryToken = strtok(NULL, " "); 
+
+    }
+
+    return NULL;
+
+
+
+}
+
+
+void rank(struct hashmap* hm, char** query) {
+
+    if(hm){
+        // to avoid unused
+    }
+    if(query){
+        // to avoid unused
+    }
+
+        // computes the score for each document based on DF-IDF rank of search query
+        // must also determine if there is no document with a match (if none of the words in the search query appear in any of the documents)
+        // for each document 
+        //     score =0;
+        //         for each word in each document{ 
+        //             findWord
+        //             get tfidf
+        //             score = score + tfidf
+        //         }
+        //         save document score into 2D array 
+        //         sort array using quicksort
+        //         print rankings to file and to console
+    
+    
+}
 
