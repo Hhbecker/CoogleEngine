@@ -55,7 +55,7 @@ After completing each method and writing a simple test case I ran Valgrind to ch
 
 In C, pointers are passed by value meaning a copy of the value is made and that copy is passed into the function. Therefore, setting the paremter pointer equal to NULL is setting a copy of the original pointer equal to NULL but the original pointer used in the calling function remains. Therefore, one needs to dereference the pointer and set that value to null instead of just assigning the copy pointer to NULL.
 
-
+If you make a copy of a pointer that is pointing to null and you change the copy the original pointer will stilll point to null because null is an address and when you set the copy to a value it changes the address that that copy pointer points to. If you make a copy of a pointer that points to a valid struct and change the contents of the struct from the copy pointer the contents of the struct of the original pointer will also change. This difference depending on wether the pointer is null or valid really messed up my saturday morning. 
 
 ## Testing the hashmap
 

@@ -28,8 +28,8 @@ struct hashmap {
 // this acts as an interface that is then implemented in another file
 struct hashmap* training(char* directory, char* charBuckets );
 void hash_table_insert(struct hashmap* hashmapPtr, char* word, int docID);
-struct wordNode* findWord(struct wordNode* head, char* word, int insertMode);
-struct docNode* findDoc(struct wordNode* theWord, int docID, int insertMode);
+struct wordNode* findWord(struct hashmap* hm, int index, char* word, int insertMode);
+void addDoc(struct wordNode* wordPtr, int docID);
 struct hashmap* hm_create(int num_buckets);
 int hm_get(struct hashmap* hm, char* word, char* document_id);
 void hm_put(struct hashmap* hm, char* word, char* document_id, int num_occurrences);
