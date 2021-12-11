@@ -49,7 +49,8 @@ struct hashmap* training(char* directory, char* charBuckets ){
     struct hashmap* hashmapPtr = hm_create(numBuckets);
 
     // 6. iterate through words in documents and call hash_table_insert
-    for(int i=0; i<numFiles; i++){
+    // change back to i<numFiles
+    for(int i=0; i<1; i++){
         // create file pointer from file name char string
         FILE* filePtr = fopen(result.gl_pathv[i], "r"); // result.gl_pathv is an array of file names
 
@@ -130,19 +131,33 @@ void hash_table_insert(struct hashmap* hm, char* word, int docID){
         // • allocate space for word and doc ID strings (strdup does this automatically)
         // • increment num_elements in hashmap
 
+        // find word or create new word (returns pointer to the word creates node if necessary)
+        // find doc within word or create new doc 
+        // update doc frequency
+
         // 1. list not initialized
         if(!hm->pointerArray[index]){
             printf("Linked list in bucket %d not initialized, creating first node now\n", index);
+            
+            // 1. wordNode initialization
             // allocate space for a new word node 
             hm->pointerArray[index] = (struct wordNode*) malloc(sizeof(struct wordNode));
             // copy word into llnode (strdup automatically allocates space for the duplicate string) 
             hm->pointerArray[index]->word = strdup(word);
+            // set df to 1
+            hm->pointerArray[index]->df = 1;
             // set next pointer of llnode to NULL
-            hm->pointerArray[index]->next = NULL;
+            hm->pointerArray[index]->nextWord = NULL;
             // allocate space for docNode
-            hm->pointerArray[index]->docList = 
-
-
+            hm->pointerArray[index]->docList = (struct docNode*) malloc (sizeof(struct docNode));
+            
+            // 2. docNode initialization 
+            // set docID
+            hm->pointerArray[index]->docList->docID = docID;
+            // set num occurences 
+            hm->pointerArray[index]->docList->numOccurences = 1;
+            // set pointer to next document to NULL
+            hm->pointerArray[index]->docList->nextDoc = NULL;
 
             //increment num elements 
             hm->num_elements++;
@@ -150,26 +165,32 @@ void hash_table_insert(struct hashmap* hm, char* word, int docID){
             return;
         }
 
+        // 2. list is initialized search for item - item found
+        else{
+            // create a llnode pointer and assign it to hm->map[index] which is pointing to the first node in the list
+            struct wordNode* tempPTR = hm->pointerArray[index];
+            struct wordNode* trailingPTR = tempPTR;
 
-//         // 2. list is initialized item found
-//         else{
-//             // create a llnode pointer and assign it to hm->map[index] which is pointing to the first node in the list
-//             struct llnode* tempPTR = hm->map[index];
-//             struct llnode* trailingPTR = hm->map[index];
+            if(trailingPTR){
+                // to avoid error: variable ‘trailingPTR’ set but not used
+            }
            
-//             while(tempPTR){
-//             //compare word string and docID
-//                 if( (strcmp(tempPTR->document_id, document_id) == 0) && (strcmp(tempPTR->word, word) == 0) ){
-//                     tempPTR->num_occurrences = num_occurrences;  
-//                     printf("KVP found in hashmap, overwriting occurence count now\n");
-//                     return;
-//                 }
-//                 else{
-//                     trailingPTR = tempPTR;
-//                     tempPTR = tempPTR->next;
-//                     printf("This node key did not match the query key, checking next node..\n");
-//                 }
-//             }
+            while(tempPTR){
+            //compare word string 
+                if( strcmp(tempPTR->word, word) == 0){
+                    //tempPTR->num_occurrences = num_occurrences;  
+                    printf("KVP found in hashmap, overwriting occurence count now\n");
+                    return;
+                }
+                else{
+                    trailingPTR = tempPTR;
+                    tempPTR = tempPTR->nextWord;
+                    printf("This node key did not match the query key, checking next node..\n");
+                }
+            }
+        }
+
+
 //         // 3. list is initialized item not found
 //                 printf("KVP not found in hashmap, creating new list node now\n");
 //                 struct llnode* newNodePTR = trailingPTR->next;
@@ -213,4 +234,5 @@ int hash(struct hashmap* hm, char* word, int document_id){
     }
 
 }
+
 
