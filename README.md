@@ -125,7 +125,21 @@ A formal description of the search problem:
     B. Remove stop words from hashmap 
 
 2. Search phase 
-    A. compute DF-IDF?
+    A. read search query words from standard in
+    b. save in an array of string arrays somehow 
+    c. for each document 
+        score =0;
+            for each word in each document{ 
+                findWord
+                get tfidf
+                score = score + tfidf
+            }
+            save document score into 2D array 
+            sort array using quicksort
+            print rankings to file and to console
+
+    
+    compute tF-IDF?
 
     B. create a file called search_scores.txt
     C. Save search query and list of documents by their DF-IDF into search_scores.txt in format filename:score for your query on each document in descending order (delimited by new lines)
@@ -210,22 +224,13 @@ The tf-idf score gives us a measure of how important is a word to a document amo
 The document rank for a single word of the search query = TF*IDF
 The overall document rank for all words in the search query is the sum of ranks for individual words
 
-Jonathan's office hours to do list
-* what should the code file (files?) be named?
-* figure out glob function for reading n documents 
-* figure out makefile 
-
     To do 
     * create flowchart
-    * figure out how to open each file and call printf on each word
-    * test old hashmap to figure out what's wrong with it 
-    * reread all of specifications to figure out exact structure of new hashmap and DF-IDF calculation 
-    * figure out how to make new hashmap structure 
+    * reread all of specifications
     
-    * worry about implementing glob after you get the rest of the thing working
-    * I'd like to call the function on a subdirectory of files instead of having the code in the same directory as the text files - figure out how to open p5docs as a subdirectory
-
     * make a hashing function where num buckets is always odd and explain why in readMe
+    * extend stop word removal to check a hardcoded list of prepositions and explain stop words in ReadMe
+    * I could split all functions into driver.c train.c and search.c files
 
 What to submit
 * the source code files on github with function header documentation
@@ -251,3 +256,29 @@ Testing new hashmap
 -invalid directory
 -no files in directory
 --files are blank
+
+-first make sure training phase is correct by checking the presence and docFrequency of each word
+-then make sure the tf-idf score is correct for a search query on each word
+
+domain and range of tf-idf 
+domain: 
+*tf is an integer (0 or positive whole number)
+*idf = ln(numFiles/docFrequency)
+*numFiles is an integer
+*docFrequency is an integer
+*numFiles/docFrequency is a positive real number 
+*ln(positive real number) could be negative 
+
+Tradeoff: 
+1. calculate and store idf during training for each word 
+* must add storage space to each word struct
+* idf calculation requires log, division, and comparison during training for every word
+* will not repeat idf calculation during search
+
+
+2. compare docFrequency and numFiles during training
+* do not need more space in each word struct
+* training phase stop word removal a single comparison
+* will repat idf calculation during search phase 
+
+Often there will be many more words throughout the documents than there will be words in the search query. For every word that is in both the documents and the search query you require 4 calculations for option 2. and for every word that is in the documents but not in the search query you save 2 calculations. Therefore, if the search query is half as long as the documents the methods are equal but as the documents grow larger than twice the search query method 2 becomes more efficient. 
