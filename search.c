@@ -7,6 +7,11 @@
 #include <assert.h>
 
 
+struct qeuryNode {
+    char* word;
+    struct queryNode* next; 
+};
+
 int main(void) {
     // skips user prompts for easy testing
     int debug = 1; // 1=true
@@ -15,7 +20,7 @@ int main(void) {
     char* charBuckets;
     printf("How many buckets?: ");
     if(debug){
-        charBuckets = "3";
+        charBuckets = "5";
     }
     else{
         // create inputs for getline function
@@ -58,26 +63,13 @@ int main(void) {
     // 4. call training method
     mapStructPtr = training(directory, charBuckets);
 
-    if(mapStructPtr){
-        // to avoid error: variable ‘mapStructPtr’ set but not used
-    }
+    printf("\n\nTraining phase complete\n\n\n");
  
     // 5. prompt user for search query and save it as a string
+    char** queryArray = read_query();
 
-    // For reading in a line of words (word search query)
-
-    // char* line = NULL;
-    // size_t len = 0;
-    // size_t lineSize = 0;
-
-    // // uncomment line below to read in a line of words from standard in
-    // //lineSize = getline(&line, &len, stdin); 
-
-    // char* token = strtok(line, " ");
-
-    // while(token != NULL){
-    //     printf("Word by word: %s\n", token);
-    //     token = strtok(NULL, " "); 
-    // }
-   
+    // 6. call rank to calculate scores for each document and print them to console
+    rank(mapStructPtr, queryArray);
+    
 }
+
