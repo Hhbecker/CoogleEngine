@@ -9,13 +9,13 @@
 
 int main(void) {
     // skips user prompts for easy testing
-    bool debug = true;
+    int debug = 1; // 1=true
 
     // 1. prompt user for number of buckets and save it as a string
     char* charBuckets;
     printf("How many buckets?: ");
     if(debug){
-        charBuckets = "15";
+        charBuckets = "3";
     }
     else{
         // create inputs for getline function
