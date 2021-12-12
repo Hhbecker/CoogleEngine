@@ -15,6 +15,8 @@
 
 // hm->num_elements NOT IMPLEMENTED CURRENTLY
 
+// struct docNode tfid storage NOT IMPLEMENTED CURRENTLY
+
 // training: 
 // inputs:
 // returns: the populated hash table (if parameters are valid)
@@ -117,6 +119,7 @@ void stop_word(struct hashmap* hm, int numFiles){
                 }
 
             }
+            free(Ptr);
         }
     }
 
@@ -131,6 +134,8 @@ void removeWord(struct hashmap* hm, struct wordNode* trailingPtr, struct wordNod
     if(!(trailingPtr || Ptr)){
         printf("Passing NULL pointers into remove: returning\n");
     }
+
+    printf("inside remove word\n");
         
     if (Ptr==trailingPtr) // the target node is first in the list
     {
@@ -141,14 +146,14 @@ void removeWord(struct hashmap* hm, struct wordNode* trailingPtr, struct wordNod
                 printf("Target node is first with nodes after it\n");
                 hm->pointerArray[index] = Ptr->nextWord;
                 freeWord(Ptr);
-                free(Ptr);
+                //free(Ptr);
             }
             else // the target node is the only element in the list
             {
                 printf("Target node is the only node in list\n");
                 hm->pointerArray[index] = NULL;
                 freeWord(Ptr);
-                free(Ptr);
+                //free(Ptr);
             }
     }	
     else // the target node is not first in the list
@@ -158,14 +163,14 @@ void removeWord(struct hashmap* hm, struct wordNode* trailingPtr, struct wordNod
                 printf("Target node is between nodes\n");
                 trailingPtr->nextWord = Ptr->nextWord;
                 freeWord(Ptr);
-                free(Ptr);
+                //free(Ptr);
             }
             else // the target node is at the end of the list
             {
                 printf("Target node is end of list\n");
                 trailingPtr->nextWord = NULL;
                 freeWord(Ptr);
-                free(Ptr);
+                //free(Ptr);
             }
     }
     return;
@@ -187,9 +192,9 @@ void freeWord(struct wordNode* wordPtr){
             //set PTR to next node or NULL
             docPtr = docPtr->nextDoc;
             // free node
-            if(trailingPtr->tfidf){
-                free(trailingPtr->tfidf);
-            }
+            // if(trailingPtr->tfidf){
+            //     free(trailingPtr->tfidf);
+            // }
             free(trailingPtr);
             // move trailing PTR up the list
             trailingPtr = docPtr;
@@ -265,8 +270,6 @@ void hash_table_insert(struct hashmap* hm, char* word, int docID){
     if(wordPtr){
         // to avoid unused error for now
     }
-    
-
 
 }
 
@@ -460,6 +463,10 @@ int read_query(struct hashmap* mapStructPtr, int numFiles){
     size_t queryLineSize = 0;
 
     queryLineSize = getline(&queryLine, &queryLength, stdin); 
+
+    if(queryLineSize == 0){
+        // to avoid error
+    }
 
     if(queryLine[0]=='\n'){
         printf("query is empty, try again.\n\n");
@@ -728,6 +735,8 @@ void hm_destroy(struct hashmap* hm){
                 }
             }
         }
+
+        printf("words freed\n");
 
         // free array of pointers
         free(hm->pointerArray);
