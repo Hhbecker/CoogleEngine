@@ -231,6 +231,7 @@ The overall document rank for all words in the search query is the sum of ranks 
     * make a hashing function where num buckets is always odd and explain why in readMe
     * extend stop word removal to check a hardcoded list of prepositions and explain stop words in ReadMe
     * I could split all functions into driver.c train.c and search.c files
+    * update other function to accomodate the fact that the glob results are now attached to the hashmap struct
 
 What to submit
 * the source code files on github with function header documentation
@@ -282,3 +283,26 @@ Tradeoff:
 * will repat idf calculation during search phase 
 
 Often there will be many more words throughout the documents than there will be words in the search query. For every word that is in both the documents and the search query you require 4 calculations for option 2. and for every word that is in the documents but not in the search query you save 2 calculations. Therefore, if the search query is half as long as the documents the methods are equal but as the documents grow larger than twice the search query method 2 becomes more efficient. 
+
+
+In C, strings are always null-terminated. This means that the last element of the character array is a “null” character, abbreviated \0. When you declare a string as in line 8 above, the compiler does this for you.
+
+
+Things I had to learn about this project
+-man pages
+-valgrind
+-C file I/O
+-
+
+
+Bugwatch
+-file name in search_scores seems to start printing at its index 
+
+queries that break it
+
+computer
+
+gw greco boiz
+
+
+
