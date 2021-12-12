@@ -57,19 +57,45 @@ int main(void) {
         directory = strtok(line, "\n");
     }
 
+
+    glob_t result;
+    int retval = glob(directory, 0, NULL, &result);
+    if(retval !=0){
+        printf("Directory invalid, glob unsuccessful: exiting main\n");
+        return -1;
+    }
+
+        // 4. confirm searchable files are present in the requested directory
+    int numFiles = (int) result.gl_pathc;
+    if(result.gl_pathc<1){
+        printf("No files in this directory: exiting main\n");
+        return -1;
+    }
+
+    printf("num files is: %d\n", numFiles);
+
+    glob_t* globPtr = &result;
+
     // 3. create pointer to hashmap struct
     struct hashmap* mapStructPtr;
 
     // 4. call training method
-    mapStructPtr = training(directory, charBuckets);
+    mapStructPtr = training(directory, globPtr, charBuckets);
 
     printf("\n\nTraining phase complete\n\n\n");
- 
-    // 5. prompt user for search query and save it as a string
-    char** queryArray = read_query();
 
-    // 6. call rank to calculate scores for each document and print them to console
-    rank(mapStructPtr, queryArray);
-    
+    int queryResult = 1;
+
+    while(queryResult == 1){
+        queryResult = read_query(mapStructPtr, numFiles);
+    }
+
+    if(queryResult > 0){
+        // to avoid error
+    }
+ 
+    printf("User entered X: must destroy engine\n");
+
 }
+
 

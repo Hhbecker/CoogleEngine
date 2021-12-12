@@ -5,6 +5,9 @@
 #include <glob.h>
 #include <stdbool.h>
 #include "hashmap.h"
+#include <glob.h>
+#include <math.h>
+
 // link to Header file "hashmap.h" which contains:
 // linked list node structs for word and doc linked lists
 // hashmap struct
@@ -15,7 +18,7 @@
 // training: 
 // inputs:
 // returns: the populated hash table (if parameters are valid)
-struct hashmap* training(char* directory, char* charBuckets ){
+struct hashmap* training(char* directory, glob_t* globPtr, char* charBuckets ){
 
     // 1. confirm inputs are not NULL
     if(!(directory)|| !(charBuckets)){
@@ -30,22 +33,24 @@ struct hashmap* training(char* directory, char* charBuckets ){
         return NULL;
     }
 
-    // 3. confirm glob return value is zero
-    glob_t result;
-    int retval = glob(directory, 0, NULL, &result);
-    if(retval !=0){
-        printf("Directory invalid, glob unsuccessful: returning NULL\n");
-        return NULL;
-    }
+    // // 3. confirm glob return value is zero
+    // glob_t result;
+    // int retval = glob(directory, 0, NULL, &result);
+    // if(retval !=0){
+    //     printf("Directory invalid, glob unsuccessful: returning NULL\n");
+    //     return NULL;
+    // }
 
-    // 4. confirm searchable files are present in the requested directory
-    int numFiles = (int) result.gl_pathc;
-    if(result.gl_pathc<1){
-        printf("No files in this directory: returning NULL\n");
-        return NULL;
-    }
+    // // 4. confirm searchable files are present in the requested directory
+    // int numFiles = (int) result.gl_pathc;
+    // if(result.gl_pathc<1){
+    //     printf("No files in this directory: returning NULL\n");
+    //     return NULL;
+    // }
 
-    printf("num files is: %d\n", numFiles);
+    // printf("num files is: %d\n", numFiles);
+
+    int numFiles = (int) globPtr->gl_pathc;
 
     // 5. create hashmap with specified number of buckets
     struct hashmap* hashmapPtr = hm_create(numBuckets);
@@ -53,7 +58,7 @@ struct hashmap* training(char* directory, char* charBuckets ){
     // 6. iterate through words in documents and call hash_table_insert
     for(int i=0; i<numFiles; i++){
         // create file pointer from file name char string
-        FILE* filePtr = fopen(result.gl_pathv[i], "r"); // result.gl_pathv is an array of file names
+        FILE* filePtr = fopen(globPtr->gl_pathv[i], "r"); // result.gl_pathv is an array of file names
 
         // this creates a char array of size 1023 because no word will be more than 1023 characters
         char buf[1023]; 
@@ -61,7 +66,7 @@ struct hashmap* training(char* directory, char* charBuckets ){
         // while fscanf does not throw an error
         while(fscanf(filePtr, "%s", buf)==1){
             // the buf variable contains the character string of the next word being scanned in
-            printf("File: %s, word:'%s'\n", result.gl_pathv[i], buf);
+            printf("File: %s, word:'%s'\n", globPtr->gl_pathv[i], buf);
             hash_table_insert(hashmapPtr, buf, i);
         }
 
@@ -198,19 +203,6 @@ void freeWord(struct wordNode* wordPtr){
     return;
 }
 
-
-
-// double tfidf(struct wordNode* wordPtr, int docID){
-//     if(wordNode->docList->tfid){
-//         return tfidf
-//     }
-//     else{
-//         double* tfidf = (double*) malloc(sizeof(double));
-//     }
-// }
-
-
-
 // hm_create: allocates space for a new hashmap struct using the specified number of buckets
 // input: number of buckets in the hashmap
 // returns: pointer to a hashmap struct
@@ -258,12 +250,8 @@ void hash_table_insert(struct hashmap* hm, char* word, int docID){
         return;
     }
 
-    // 2. hash 
-    int index = hash(hm->num_buckets, word);
-    printf("hash index = %d\n", index);
-
     // returns pointer to a wordNode containing the word just passed into insert
-    struct wordNode* wordPtr = findWord(hm, index, word, 1); // 1 for insert mode
+    struct wordNode* wordPtr = findWord(hm, word, 1); // 1 for insert mode
 
     addDoc(wordPtr, docID);
 
@@ -351,7 +339,10 @@ void addDoc(struct wordNode* wordPtr, int docID){
 // pass in the pointerArray[index] pointer
 // 
 // returns: pointer to the word in question (returns NULL if on retrive mode and word does not exist)
-struct wordNode* findWord(struct hashmap* hm, int index, char* word, int insertMode){
+struct wordNode* findWord(struct hashmap* hm, char* word, int insertMode){
+
+    // hash 
+    int index = hash(hm->num_buckets, word);
 
     // 1. word list not initialized 
     if(!(hm->pointerArray[index])){
@@ -420,7 +411,7 @@ struct wordNode* findWord(struct hashmap* hm, int index, char* word, int insertM
             return newNodePTR;
         }
         else{
-            printf("Word not found in hashmap: returning NULL\n");
+            printf("Word '%s' not found in hashmap: returning NULL\n", word);
             return NULL;
         }
     }
@@ -449,10 +440,15 @@ int hash(int numBuckets, char* word){
 
 }
 
+// prompt user for search query and save it as a string
+int read_query(struct hashmap* mapStructPtr, int numFiles){
 
-char** read_query(void){
+    // most breakable function
+    // adding space after last word breaks it
+
+
     // prompt user for search query
-    printf("Enter search string or X to exit: ");
+    printf("Enter search string or X to exit:\n");
 
     char* queryLine = NULL;
     size_t queryLength = 0;
@@ -460,65 +456,120 @@ char** read_query(void){
 
     queryLineSize = getline(&queryLine, &queryLength, stdin); 
 
-    printf("Whole line: %s\n", queryLine);
-    printf("Query length: %d\n", (int) queryLineSize);
-
     int spaces = 0;
         for(int i=0; queryLine[i]!='\0'; i++){
             if(queryLine[i] == ' '){
                 spaces++;
             
             }
-            printf("%c\n", queryLine[i]);
         }
+
     printf("Spaces: %d\n", spaces);
 
-    char* queryToken = strtok(queryLine, " ");
+    if(spaces==0){
+        char* X = "X";
+        if(strcmp(queryLine, X)==0){
+            return 0;
+        }
+    }
+
+    char* queryToken = strtok(queryLine, " \n");
 
     // maximum word length in query is 20 chars
-    char queryArray[spaces+1][20];
+    char** queryArray = (char**) malloc(sizeof(char*)*(spaces+1));
 
-    if(queryArray[0]){
-
-    }
-
+    char* copy;
     int count = 0;
-    while(queryToken != NULL){
-         printf("Entering '%s' into query array\n", queryToken);
-         //queryArray[count] = queryToken; 
-         queryToken = strtok(NULL, " "); 
 
+    while(queryToken != NULL){
+        printf("Entering '%s' into query array\n", queryToken);
+        copy = strdup(queryToken); 
+        queryArray[count] = copy;
+        queryToken = strtok(NULL, " \n"); 
+        count++;
     }
 
-    return NULL;
+    // 6. call rank to calculate scores for each document and print them to console
+    rank(mapStructPtr, numFiles, spaces+1, queryArray);
 
-
-
+    // return 1 for true
+    return 1;
 }
 
 
-void rank(struct hashmap* hm, char** query) {
+void rank(struct hashmap* hm, int numFiles, int querySize, char** query) {
 
-    if(hm){
-        // to avoid unused
-    }
-    if(query){
-        // to avoid unused
+    if(!(hm || query)){
+        printf("Passing nULL parameters into rank: returning\n");
+        return;
     }
 
-        // computes the score for each document based on DF-IDF rank of search query
-        // must also determine if there is no document with a match (if none of the words in the search query appear in any of the documents)
-        // for each document 
-        //     score =0;
-        //         for each word in each document{ 
-        //             findWord
-        //             get tfidf
-        //             score = score + tfidf
-        //         }
+    // computes the score for each document based on DF-IDF rank of search query
+
+    // must be able to determine if there is no document with a match 
+    // (if none of the words in the search query appear in any of the documents)
+  
+    double score;
+    struct wordNode* wordPtr;
+    int retrieveMode = 0;
+    double tfidf;
+
+        // for each document
+        for(int i=0; i<numFiles; i++){
+            
+            score = 0.0;
+            // for each word
+            for(int j=0; j<querySize; j++){ 
+                tfidf = 0.0;
+
+                wordPtr = findWord(hm, query[j], retrieveMode);
+
+                if(wordPtr){
+                    tfidf = tfidfCalc(wordPtr, i, numFiles);
+                }
+
+                score = score + tfidf;
+            }   
+            printf("document: %d score: %f\n", i, score);
         //         save document score into 2D array 
         //         sort array using quicksort
         //         print rankings to file and to console
+        }
     
     
+}
+
+
+// 
+double tfidfCalc(struct wordNode* wordPtr, int docID, int numFiles){
+    double tfidf = 0.0;
+
+    // if(wordPtr->docList->tfidf){
+    //     // dereference pointer with *
+    //     tfidf = *wordPtr->docList->tfidf;
+    //     return tfidf;
+    // }
+    //else{
+        double idf;
+        double tf;
+
+        struct docNode* docPtr = wordPtr->docList;
+
+        while(docPtr){
+            if(docPtr->docID == docID){
+                tf = docPtr->termFrequency;
+                idf = (numFiles/wordPtr->docFrequency);
+                idf = log(idf);
+                tfidf = tf*idf;
+                printf("Returning tfidf score of %f\n", tfidf);
+                return tfidf;
+            }
+            docPtr=docPtr->nextDoc;
+        }
+        // I can store the tfidf for a document here if I want to
+        //(double*) malloc(sizeof(double));
+        printf("Doc not found in tfidf Calc function: returning score of 0\n");
+        return 0.0;
+    //}
 }
 
