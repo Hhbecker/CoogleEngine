@@ -3,13 +3,13 @@
 # makefile only recompiles files that have changed since the last executable was created
 
 all: search.o hashmap.o
-	gcc search.o hashmap.o -o search -Wall -Wextra -Werror -pedantic -std=gnu99 -pedantic -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition -g
+	gcc search.o hashmap.o -o search -Wall -Wextra -Werror -pedantic -std=gnu99 -pedantic -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition -g -lm
 
 search.o: search.c
-	gcc -c search.c -Wall -Wextra -Werror -pedantic -std=gnu99 -pedantic -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition -g
+	gcc -c search.c -Wall -Wextra -Werror -pedantic -std=gnu99 -pedantic -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition -g -lm
 
 hashmap.o: hashmap.c hashmap.h
-	gcc -c hashmap.c -Wall -Wextra -Werror -pedantic -std=gnu99 -pedantic -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition -g
+	gcc -c hashmap.c -Wall -Wextra -Werror -pedantic -std=gnu99 -pedantic -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition -g -lm
 	
 clean:
 	rm *.o search 
