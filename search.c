@@ -82,19 +82,16 @@ int main(void) {
     // 4. call training method
     mapStructPtr = training(directory, globPtr, charBuckets);
 
-    printf("\n\nTraining phase complete\n\n\n");
+    printf("\n\n///////////////////    Training phase complete    \\\\\\\\\\\\\\\\\\\\\n\n");
 
     int queryResult = 1;
 
     while(queryResult == 1){
         queryResult = read_query(mapStructPtr, numFiles);
     }
-
-    if(queryResult > 0){
-        // to avoid error
-    }
  
-    printf("User entered X: must destroy engine\n");
+    printf("User entered X: Destroying engine\n");
+    hm_destroy(mapStructPtr);
 
 }
 

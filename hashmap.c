@@ -50,10 +50,14 @@ struct hashmap* training(char* directory, glob_t* globPtr, char* charBuckets ){
 
     // printf("num files is: %d\n", numFiles);
 
+
+
     int numFiles = (int) globPtr->gl_pathc;
 
     // 5. create hashmap with specified number of buckets
     struct hashmap* hashmapPtr = hm_create(numBuckets);
+
+    hashmapPtr->fileNames = *globPtr->gl_pathv;
 
     // 6. iterate through words in documents and call hash_table_insert
     for(int i=0; i<numFiles; i++){
@@ -227,6 +231,7 @@ struct hashmap* hm_create(int num_buckets){
     // set the num_buckets variable in the struct equal to the parameter and set num elements to zero
     myMap->num_buckets=num_buckets; 
     myMap->num_elements=0;
+    myMap->fileNames = NULL;
 
     printf("\nHashmap initialized with %d buckets\n\n", num_buckets);
 
@@ -456,6 +461,12 @@ int read_query(struct hashmap* mapStructPtr, int numFiles){
 
     queryLineSize = getline(&queryLine, &queryLength, stdin); 
 
+    if(queryLine[0]=='\n'){
+        printf("query is empty, try again.\n\n");
+        return 1;
+
+    }
+
     int spaces = 0;
         for(int i=0; queryLine[i]!='\0'; i++){
             if(queryLine[i] == ' '){
@@ -466,14 +477,26 @@ int read_query(struct hashmap* mapStructPtr, int numFiles){
 
     printf("Spaces: %d\n", spaces);
 
-    if(spaces==0){
-        char* X = "X";
-        if(strcmp(queryLine, X)==0){
-            return 0;
-        }
-    }
+    int queryInt;
+
+
 
     char* queryToken = strtok(queryLine, " \n");
+    
+
+        if(spaces==0){
+        if((int) strlen(queryToken)==1){
+            printf("one letter query\n");
+            queryInt = (int) queryToken[0];
+            printf("query is %c, as int is %d\n", queryToken[0], queryInt);
+            
+            if((int) queryToken[0] == 88){
+                // user inputed X
+                printf("user input X\n");
+                return 0;
+            }
+        }
+    }
 
     // maximum word length in query is 20 chars
     char** queryArray = (char**) malloc(sizeof(char*)*(spaces+1));
@@ -514,35 +537,136 @@ void rank(struct hashmap* hm, int numFiles, int querySize, char** query) {
     int retrieveMode = 0;
     double tfidf;
 
+    int* indicies = (int*) malloc(sizeof(int*)*numFiles);
+
+    double* scores = (double*) malloc(sizeof(double*)*numFiles);
+
+    int* wordPresence = (int*) malloc(sizeof(int*)*querySize);
+
+    for(int k=0; k<querySize; k++){
+        wordPresence[k] = 1;
+    }
+
+    // create an array of 1's size numWords in query called wordPresence
+    // if word not found set that wordPresence index to zero
+    // check word presence index before calling find word
+
         // for each document
         for(int i=0; i<numFiles; i++){
-            
+            // fill indices array
+            indicies[i] = i;
+            // set document score to zero
             score = 0.0;
+
             // for each word
             for(int j=0; j<querySize; j++){ 
-                tfidf = 0.0;
+                if(wordPresence[j]){
+                    tfidf = 0.0;
 
-                wordPtr = findWord(hm, query[j], retrieveMode);
+                    wordPtr = findWord(hm, query[j], retrieveMode);
 
-                if(wordPtr){
-                    tfidf = tfidfCalc(wordPtr, i, numFiles);
+                    if(wordPtr){
+                        printf("word pointer returned by findWord is valid for word\n");
+                        tfidf = tfidfCalc(wordPtr, i, numFiles);
+                    }
+                    else{
+                        wordPresence[j] = 0;
+                    }
+                    score = score + tfidf;
                 }
 
-                score = score + tfidf;
             }   
+            scores[i] = score;
             printf("document: %d score: %f\n", i, score);
         //         save document score into 2D array 
         //         sort array using quicksort
         //         print rankings to file and to console
         }
     
+    // sort scores and whenever you swap indicies do the same in indicies 
+
+    double temp1;
+    int temp2;
+
+    printf("\n\n Scores unsorted:\n");
+
+    for(int i=0; i<numFiles; i++){
+        printf("Index %d, score: %f\n",indicies[i], scores[i]);
+    }
+
+    for (int i = numFiles; i >= 0; i--){
+        for (int j = numFiles; j > numFiles - i; j--){
+            if (scores[j] > scores[j - 1]){
+                
+                // swap(scores[j], scores[j-1])
+                temp1 = scores[j];
+                scores[j] = scores[j-1];
+                scores[j-1] = temp1;
+
+                // swap indicies[j], indicies[j-1]
+                temp2 = indicies[j];
+                indicies[j] = indicies[j-1];
+                indicies[j-1] = temp2;
+
+            }
+        }
+    }
+    
+    printf("\nSorted scores:\n");
+
+    for(int i=0; i<numFiles; i++){
+        printf("Index %d, score: %f\n",indicies[i], scores[i]);
+    }
+
+    // scores is a sorted array of doubles 
+    // indicies is an array of ints that corresponds 
+    // to the indice of the fileNames list that should be read for each index in scores
+
+    // search_scores.txt should contain
+    // d1.txt   2.009
+    // d2.txt   0.000
+
+    FILE *fp;
+    // fopen in mode 'a' for append
+    fp = fopen ("search_scores.txt", "a");
+
+    //char* concatenation;
+    //char* fileName;
+    char* queryWord;
+
+    // 1. get correct fileName pointed at by fileName char pointer
+    // 2. print a tab
+    // 3. print score as a double %g
+    // 4. add newline
+
+    fprintf(fp, "\nQuery:\n"); 
+    for (int i = 0; i<querySize; i++) {
+        queryWord = query[i];
+        fprintf(fp, "%s ", queryWord);
+    }
+    fprintf(fp, "\n\nDocument Rankings:\n"); 
+
+
+    // print query here
+    int index; 
+
+    for (int i = 0; i<numFiles; i++) {
+        // write to file using fputc() function 
+        index = indicies[i];
+        char* fileName = &hm->fileNames[index];
+            fprintf(fp, "%s    %f\n", fileName, scores[i]);
+    }
+    
+    fclose (fp);
     
 }
 
 
 // 
-double tfidfCalc(struct wordNode* wordPtr, int docID, int numFiles){
+double tfidfCalc(struct wordNode* wordPtr, int docNum, int numFiles){
     double tfidf = 0.0;
+
+    printf("\nentering tfidf calc, query docID is %d\n\n", docNum);
 
     // if(wordPtr->docList->tfidf){
     //     // dereference pointer with *
@@ -556,9 +680,12 @@ double tfidfCalc(struct wordNode* wordPtr, int docID, int numFiles){
         struct docNode* docPtr = wordPtr->docList;
 
         while(docPtr){
-            if(docPtr->docID == docID){
+            if(docPtr->docID == docNum){
                 tf = docPtr->termFrequency;
-                idf = (numFiles/wordPtr->docFrequency);
+                printf("\nterm freq = %f\n", tf);
+                printf("\ndoc freq = %d\n", wordPtr->docFrequency);
+                // cast numFiles and docFrequency to doubles
+                idf = ((double) numFiles/((double) wordPtr->docFrequency));
                 idf = log(idf);
                 tfidf = tf*idf;
                 printf("Returning tfidf score of %f\n", tfidf);
@@ -572,4 +699,46 @@ double tfidfCalc(struct wordNode* wordPtr, int docID, int numFiles){
         return 0.0;
     //}
 }
+
+
+//destroy: frees all memory allocated by hashmap
+// input: pointer to hashmap struct
+//returns: void
+void hm_destroy(struct hashmap* hm){
+
+
+    // call freeWord(wordPtr) on each word
+
+    if(hm && hm->pointerArray){ // hm pointer is not NULL
+        
+        for(int i=0; i<hm->num_buckets; i++){
+
+            if(hm->pointerArray[i]){ // this bucket has a linked list
+                struct wordNode* PTR = hm->pointerArray[i];
+                struct wordNode* trailingPTR = hm->pointerArray[i];
+
+                while(PTR){
+                    //set PTR to next node or NULL
+                    PTR = PTR->nextWord;
+                    // free word and all its documents
+                    freeWord(trailingPTR);
+                    free(trailingPTR);
+                    // move trailing PTR up the list
+                    trailingPTR = PTR;
+                }
+            }
+        }
+
+        // free array of pointers
+        free(hm->pointerArray);
+        hm->pointerArray = NULL;
+        free(hm);
+    }
+    else{
+        printf("Attempting to pass invalid parameters into hm_destroy: returning\n");
+        return;
+    }
+
+}
+
 
