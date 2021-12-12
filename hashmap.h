@@ -23,8 +23,8 @@ struct wordNode {
 struct hashmap {
         struct wordNode** pointerArray;
         int num_buckets;
-        int num_elements;
-        char* fileNames;
+        int numFiles;
+        char** fileNames;
 };
 
 // defines each function performed by a hashmap instance 

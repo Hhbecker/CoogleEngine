@@ -14,7 +14,7 @@ struct qeuryNode {
 
 int main(void) {
     // skips user prompts for easy testing
-    int debug = 1; // 1=true
+    int debug =0; // 1=true
 
     // 1. prompt user for number of buckets and save it as a string
     char* charBuckets;
@@ -40,7 +40,6 @@ int main(void) {
     char* directory;
     printf("Please specify the directory and document type you would like to search:\n");
     printf("Example: 'p5docs/*.txt'\n");
-
     
     // create inputs for getline function
     char* line = NULL;
@@ -54,12 +53,10 @@ int main(void) {
 
     directory = strtok(line, "\n");
     
-
+    // hardcode directory during debugging
     if(debug){
         directory = "p5docs/*.txt";
     }
-
-
 
     glob_t result;
     int retval = glob(directory, 0, NULL, &result);
@@ -75,7 +72,7 @@ int main(void) {
         return -1;
     }
 
-    printf("num files is: %d\n", numFiles);
+    //printf("num files is: %d\n", numFiles);
 
     glob_t* globPtr = &result;
 
@@ -85,7 +82,7 @@ int main(void) {
     // 4. call training method
     mapStructPtr = training(directory, globPtr, charBuckets);
 
-    printf("\n\n///////////////////    Training phase complete    \\\\\\\\\\\\\\\\\\\\\n\n");
+    //printf("\n\n///////////////////    Training phase complete    \\\\\\\\\\\\\\\\\\\\\n\n");
 
     int queryResult = 1;
 
@@ -93,7 +90,7 @@ int main(void) {
         queryResult = read_query(mapStructPtr, numFiles);
     }
  
-    printf("User entered X: Destroying engine\n");
+    //printf("User entered X: Destroying engine\n");
     hm_destroy(mapStructPtr);
     free(input);
     free(line);
