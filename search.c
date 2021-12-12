@@ -19,43 +19,46 @@ int main(void) {
     // 1. prompt user for number of buckets and save it as a string
     char* charBuckets;
     printf("How many buckets?: ");
+
+    // create inputs for getline function
+    char* input = NULL;
+    size_t length = 0;
+    size_t lnSize = 0;
+
+    lnSize = getline(&input, &length, stdin); 
+    if(lnSize){
+        // to avoid error: variable ‘lnSize’ set but not used
+    }
+
+    charBuckets = strtok(input, "\n");
+
     if(debug){
         charBuckets = "5";
-    }
-    else{
-        // create inputs for getline function
-        char* input = NULL;
-        size_t length = 0;
-        size_t lnSize = 0;
-
-        lnSize = getline(&input, &length, stdin); 
-        if(lnSize){
-            // to avoid error: variable ‘lnSize’ set but not used
-        }
-
-        charBuckets = strtok(input, "\n");
     }
 
     // 2. prompt user for directory to be searched and save it as a string
     char* directory;
     printf("Please specify the directory and document type you would like to search:\n");
     printf("Example: 'p5docs/*.txt'\n");
+
+    
+    // create inputs for getline function
+    char* line = NULL;
+    size_t len = 0;
+    size_t lineSize = 0;
+
+    lineSize = getline(&line, &len, stdin); 
+    if(lineSize){
+        // to avoid error: variable ‘lineSize’ set but not used
+    }
+
+    directory = strtok(line, "\n");
+    
+
     if(debug){
         directory = "p5docs/*.txt";
     }
-    else{
-        // create inputs for getline function
-        char* line = NULL;
-        size_t len = 0;
-        size_t lineSize = 0;
 
-        lineSize = getline(&line, &len, stdin); 
-        if(lineSize){
-            // to avoid error: variable ‘lineSize’ set but not used
-        }
-
-        directory = strtok(line, "\n");
-    }
 
 
     glob_t result;
@@ -92,7 +95,10 @@ int main(void) {
  
     printf("User entered X: Destroying engine\n");
     hm_destroy(mapStructPtr);
-
+    free(input);
+    free(line);
+    globfree(globPtr);
+    
 }
 
 

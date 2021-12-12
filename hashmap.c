@@ -77,7 +77,7 @@ struct hashmap* training(char* directory, glob_t* globPtr, char* charBuckets ){
         }
 
         // close the file to flush the buffer 
-        int fclose(FILE *filePtr);
+        fclose(filePtr);
     }
 
     // 8. Remove stop words
@@ -178,7 +178,9 @@ void removeWord(struct hashmap* hm, struct wordNode* trailingPtr, struct wordNod
 
 void freeWord(struct wordNode* wordPtr){
     printf("\nInside freeWord\n\n");
-    // 1. walk down document list and free each document struct
+    // 1. walk down document list 
+    // free docList ptr
+    // free each nextDoc ptr 
     if(!wordPtr->docList){
         printf("freeing word node without doc list: something's wrong\n");
         return;
@@ -206,7 +208,13 @@ void freeWord(struct wordNode* wordPtr){
 
     // 2. free each necessary word struct data
     // free word string
+
     free(wordPtr->word);
+    printf("\ncall 1\n");
+
+
+    //free(wordPtr->docList);
+    printf("\ncall 2\n");
     wordPtr->nextWord = NULL; 
 
     return;
@@ -486,8 +494,6 @@ int read_query(struct hashmap* mapStructPtr, int numFiles){
 
     int queryInt;
 
-
-
     char* queryToken = strtok(queryLine, " \n");
     
 
@@ -519,8 +525,16 @@ int read_query(struct hashmap* mapStructPtr, int numFiles){
         count++;
     }
 
+    
+
     // 6. call rank to calculate scores for each document and print them to console
     rank(mapStructPtr, numFiles, spaces+1, queryArray);
+
+    for(int k=0; k<spaces+1; k++){
+        free(queryArray[k]);
+    }
+    free(queryArray);
+    free(queryLine);
 
     // return 1 for true
     return 1;
@@ -601,24 +615,47 @@ void rank(struct hashmap* hm, int numFiles, int querySize, char** query) {
         printf("Index %d, score: %f\n",indicies[i], scores[i]);
     }
 
-    for (int i = numFiles; i >= 0; i--){
-        for (int j = numFiles; j > numFiles - i; j--){
-            if (scores[j] > scores[j - 1]){
+    // for (int i = numFiles; i >= 0; i--){
+    //     for (int j = numFiles; j > numFiles - i; j--){
+    //         if (scores[j] > scores[j - 1]){
                 
-                // swap(scores[j], scores[j-1])
-                temp1 = scores[j];
-                scores[j] = scores[j-1];
-                scores[j-1] = temp1;
+    //             // swap(scores[j], scores[j-1])
+    //             temp1 = scores[j];
+    //             scores[j] = scores[j-1];
+    //             scores[j-1] = temp1;
 
-                // swap indicies[j], indicies[j-1]
+    //             // swap indicies[j], indicies[j-1]
+    //             temp2 = indicies[j];
+    //             indicies[j] = indicies[j-1];
+    //             indicies[j-1] = temp2;
+
+    //         }
+    //     }
+    // }
+
+    int i, j;
+
+    for (i = 0; i < numFiles-1; i++){   
+
+    // Last i elements are already in place   
+        for (j = 0; j < numFiles-i-1; j++){
+            if (scores[j] < scores[j+1]){
+            // swap(&arr[j], &arr[j+1]);
+
+                // swap(scores[j], scores[j+1])
+                temp1 = scores[j];
+                scores[j] = scores[j+1];
+                scores[j+1] = temp1;
+
+                // swap indicies[j], indicies[j+1]
                 temp2 = indicies[j];
-                indicies[j] = indicies[j-1];
-                indicies[j-1] = temp2;
+                indicies[j] = indicies[j+1];
+                indicies[j+1] = temp2;
 
             }
         }
     }
-    
+
     printf("\nSorted scores:\n");
 
     for(int i=0; i<numFiles; i++){
@@ -665,6 +702,11 @@ void rank(struct hashmap* hm, int numFiles, int querySize, char** query) {
     }
     
     fclose (fp);
+
+    free(indicies);
+    free(scores);
+    free(wordPresence);
+    return;
     
 }
 
@@ -733,6 +775,7 @@ void hm_destroy(struct hashmap* hm){
                     // move trailing PTR up the list
                     trailingPTR = PTR;
                 }
+                //free(hm->pointerArray[i]);
             }
         }
 
@@ -740,6 +783,7 @@ void hm_destroy(struct hashmap* hm){
 
         // free array of pointers
         free(hm->pointerArray);
+        //free(hm->fileNames);
         hm->pointerArray = NULL;
         free(hm);
     }

@@ -295,14 +295,7 @@ Things I had to learn about this project
 -
 
 
-Bugwatch
--file name in search_scores seems to start printing at its index 
+If you're actually going to make a big c project int he future you need to use valgrind as you go along instead of waiting till the end
 
-queries that break it
-
-computer
-
-gw greco boiz
-
-
+When it comes to file IO and user input in C especially there are so many edge cases and things that can go wrong that you have to account for and I am not yet experienced enough in c or in C file I/O to make a airtight program of this magnitude.
 
