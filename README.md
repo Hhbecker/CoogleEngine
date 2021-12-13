@@ -225,9 +225,9 @@ The document rank for a single word of the search query = TF*IDF
 The overall document rank for all words in the search query is the sum of ranks for individual words
 
     To do 
-    * create flowchart
-    * reread all of specifications
-    
+    * fix memory leaks and reorganize program layout
+    * improve I/O foolproofness 
+    * make function header comments
     * make a hashing function where num buckets is always odd and explain why in readMe
     * extend stop word removal to check a hardcoded list of prepositions and explain stop words in ReadMe
     * I could split all functions into driver.c train.c and search.c files
@@ -303,3 +303,24 @@ If you're actually going to make a big c project int he future you need to use v
 
 When it comes to file IO and user input in C especially there are so many edge cases and things that can go wrong that you have to account for and I am not yet experienced enough in c or in C file I/O to make a airtight program of this magnitude.
 
+--------
+My solution adheres to the full specifications and does not make any simplifying assumptions:
+
+Document reading:
+* Option 2 - Automatic reading of arbitrary number of documents. The program prompts the user for the directory name and file extension and all documents (regardless of how many) with the correct extension within the directory specified will be read into the hashmap.
+
+Hashmap: 
+* Option 2 - My hashmap is the more complex hashmap containing lists of lists
+* The user specifies the number of buckets in the hashmap at runtime.
+
+Query: 
+* The query can be of an arbitrary number of words
+* The query is entered by the user at run-time (assuming no word is longer than 20 characters)
+
+Display the contents of the most relevant document to the screen.
+
+
+Report describing your implementation 
+-flow chart
+-algorithms and how the different functions interact with each other
+-name your report first_initial-Last_Name.pdf. 
