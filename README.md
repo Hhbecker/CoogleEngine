@@ -233,6 +233,8 @@ The overall document rank for all words in the search query is the sum of ranks 
     * I could split all functions into driver.c train.c and search.c files
     * update other function to accomodate the fact that the glob results are now attached to the hashmap struct
 
+    *if there is punctuation next to a word it doesn't recognize just the word
+
 What to submit
 * the source code files on github with function header documentation
 * the makefile, and (3) 
@@ -293,6 +295,8 @@ Things I had to learn about this project
 -valgrind
 -C file I/O
 -
+
+Use GDB to find the last memory leaks
 
 
 If you're actually going to make a big c project int he future you need to use valgrind as you go along instead of waiting till the end

@@ -107,18 +107,27 @@ void stop_word(struct hashmap* hm, int numFiles){
                 // to avoid unused error
             }
 
+            // if trailing ptr = ptr I can't 
+
             while(Ptr){
                 // compare docFrequency to numFiles
                 if(Ptr->docFrequency == numFiles){
-                    //printf("word %s found in all files: calling remove\n", Ptr->word);
-                    removeWord(hm, trailingPtr, Ptr);
-                    Ptr = trailingPtr->nextWord;
+                    if(Ptr != trailingPtr){
+                        //printf("word %s found in all files: calling remove\n", Ptr->word);
+                        removeWord(hm, trailingPtr, Ptr);
+                        Ptr = trailingPtr->nextWord;
+                    }
+                    else{
+                        // stop word is first in list so restart the pointers
+                        removeWord(hm, trailingPtr, Ptr);
+                        Ptr = hm->pointerArray[i];
+                        trailingPtr = Ptr;
+                    }
                 }
                 else{
                     trailingPtr = Ptr;
                     Ptr=Ptr->nextWord;
                 }
-
             }
             free(Ptr);
         }
@@ -136,6 +145,7 @@ void removeWord(struct hashmap* hm, struct wordNode* trailingPtr, struct wordNod
         printf("Passing NULL pointers into remove: returning\n");
     }
         
+    // potential issue may be an invalid way to compare pointers
     if (Ptr==trailingPtr) // the target node is first in the list
     {
         int index=hash(hm->num_buckets, Ptr->word);
@@ -144,13 +154,15 @@ void removeWord(struct hashmap* hm, struct wordNode* trailingPtr, struct wordNod
             {
                 hm->pointerArray[index] = Ptr->nextWord;
                 freeWord(Ptr);
-                //free(Ptr);
+                free(Ptr);
+                Ptr = NULL;
             }
             else // the target node is the only element in the list
             {
                 hm->pointerArray[index] = NULL;
                 freeWord(Ptr);
-                //free(Ptr);
+                free(Ptr);
+                Ptr = NULL;
             }
     }	
     else // the target node is not first in the list
@@ -159,13 +171,15 @@ void removeWord(struct hashmap* hm, struct wordNode* trailingPtr, struct wordNod
             {
                 trailingPtr->nextWord = Ptr->nextWord;
                 freeWord(Ptr);
-                //free(Ptr);
+                free(Ptr);
+                Ptr = NULL;
             }
             else // the target node is at the end of the list
             {
                 trailingPtr->nextWord = NULL;
                 freeWord(Ptr);
-                //free(Ptr);
+                free(Ptr);
+                Ptr = NULL;
             }
     }
     return;
@@ -438,12 +452,17 @@ int read_query(struct hashmap* mapStructPtr, int numFiles){
     // prompt user for search query
     printf("\nEnter search string or X to exit:\n");
 
-    char* queryLine = NULL;
+    char* queryLn = NULL;
     char* queryToken = NULL;
     size_t queryLength = 0;
     size_t queryLineSize = 0;
 
-    queryLineSize = getline(&queryLine, &queryLength, stdin); 
+    queryLineSize = getline(&queryLn, &queryLength, stdin); 
+
+    // copy query line into another variable 
+    char* queryLine = NULL;
+    queryLine = strdup(queryLn);
+    free(queryLn);
 
     if(queryLineSize == 0){
         // to avoid error
@@ -452,7 +471,6 @@ int read_query(struct hashmap* mapStructPtr, int numFiles){
     if(queryLine[0]=='\n'){
         printf("query is empty, try again.\n\n");
         return 1;
-
     }
 
     int spaces = 0;
@@ -498,6 +516,9 @@ int read_query(struct hashmap* mapStructPtr, int numFiles){
     free(queryArray);
     free(queryLine);
     free(queryToken);
+    queryLength = 0;
+    queryLineSize = 0;
+
 
     // return 1 for true
     return 1;
