@@ -1,17 +1,17 @@
-#include "hashmap.h"
+
 #include <stdio.h>    
 #include <stdlib.h>
 #include <string.h>
 #include <glob.h>
 #include <stdbool.h>
-#include "hashmap.h"
 #include <glob.h>
 #include <math.h>
 
-// link to Header file "hashmap.h" which contains:
-// linked list node structs for word and doc linked lists
-// hashmap struct
-// function headers for the functions in this file 
+// link to Header file "header.h" which contains:
+// •linked list node structs for word and doc linked lists
+// •hashmap struct
+// •function headers for the functions in this file 
+#include "header.h"
 
 // hm->num_elements NOT IMPLEMENTED CURRENTLY
 
@@ -20,46 +20,28 @@
 // training: 
 // inputs:
 // returns: the populated hash table (if parameters are valid)
-struct hashmap* training(char* directory, glob_t* globPtr, char* charBuckets ){
+struct hashmap* training(char* directory, glob_t* globPtr, int numBuckets ){
 
-    // 1. confirm inputs are not NULL
-    if(!(directory)|| !(charBuckets)){
+    // confirm inputs are not NULL
+    if(!(directory)){
         printf("passing NULL pointers into training function: returning NULL\n");
         return NULL;
     }
 
-    // 2. confirm number of buckets is valid
-    int numBuckets = (int) strtoll(charBuckets, NULL, 10);
+    // confirm number of buckets is valid
     if(numBuckets<1){
         printf("You can't create a hashmap with %d buckets: returning NULL\n", numBuckets);
         return NULL;
     }
 
-    // // 3. confirm glob return value is zero
-    // glob_t result;
-    // int retval = glob(directory, 0, NULL, &result);
-    // if(retval !=0){
-    //     printf("Directory invalid, glob unsuccessful: returning NULL\n");
-    //     return NULL;
-    // }
-
-    // // 4. confirm searchable files are present in the requested directory
-    // int numFiles = (int) result.gl_pathc;
-    // if(result.gl_pathc<1){
-    //     printf("No files in this directory: returning NULL\n");
-    //     return NULL;
-    // }
-
-    // printf("num files is: %d\n", numFiles);
-
-
-
     int numFiles = (int) globPtr->gl_pathc;
 
     // 5. create hashmap with specified number of buckets
-    struct hashmap* hashmapPtr = hm_create(numBuckets);
+    struct hashmap* hashmapPtr = createHashmap(numBuckets);
 
+    // add list of filenames in search dir to hashmap struct (what data structure is this list of filenames? linked list?)
     hashmapPtr->fileNames = globPtr->gl_pathv;
+    // add number of files in search dir to hashmap struct
     hashmapPtr->numFiles = numFiles;
 
     // 6. iterate through words in documents and call hash_table_insert
@@ -223,7 +205,7 @@ void freeWord(struct wordNode* wordPtr){
 // hm_create: allocates space for a new hashmap struct using the specified number of buckets
 // input: number of buckets in the hashmap
 // returns: pointer to a hashmap struct
-struct hashmap* hm_create(int num_buckets){ 
+struct hashmap* createHashmap(int num_buckets){ 
     // null check parameters
     if(num_buckets < 1){
         printf("You can't create a map with %d buckets: returning NULL\n", num_buckets);
@@ -450,7 +432,7 @@ int read_query(struct hashmap* mapStructPtr, int numFiles){
 
 
     // prompt user for search query
-    printf("\nEnter search string or X to exit:\n");
+    printf("\nEnter search string or x to exit:\n");
 
     char* queryLn = NULL;
     char* queryToken = NULL;
@@ -486,7 +468,7 @@ int read_query(struct hashmap* mapStructPtr, int numFiles){
 
         if(spaces==0){
         if((int) strlen(queryToken)==1){
-            if((int) queryToken[0] == 88){
+            if((int) queryToken[0] == 120){
                 // user inputed X
                 return 0;
             }

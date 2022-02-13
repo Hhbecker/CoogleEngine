@@ -1,5 +1,110 @@
 # CoogleEngine
-Meet Coogle: Henry's very own C implementation of a search engine backend.
+Meet Coogle: my C implementation of a search engine backend.
+
+### To do
+
+* read design doc and write an explanation of what this thing is supposed to do and how it's supposed to do it
+* once you understand the hashmap data structure thoroughly then go comment all the code and make edits
+
+* comment
+* develop and run test suite
+* write readme
+
+## Big Picture 
+
+if the search phrase is “computer architecture GW”, you need to find the .txt files that contain at least some of the words in the query and then rank the files in order of relevance. The most relevant files would be ranked first, and the least relevant file would be ranked last.
+
+<img src="images/mem.png" width="500px" height="670px">
+
+
+### Training Phase
+1. read in a directory containing text files from the user
+2. create a hashmap struct which will store all text data in a more searchable form 
+3. for each document in the directory add each word to the hashmap 
+    each word has a linked list coming off it which has a node for 
+    each document the word is in and the frequency of the word in that document 
+4. remove words that appear in all document? or maybe just remove stop words?
+    free memory of words you remove
+
+Goal of training phase: create an inverted index (important concept in search algorithms)
+
+
+Stop word protocol: remove all words present in all 3 documents 
+
+### Search Phase 
+1. read in a search query from user
+2. for each word in the search query
+    find the word in the hashmap (if its present)
+    find the document rank for that word
+3. compile the docuemnt ranks for all words into an average document rank and return that
+
+
+### Destroy Phase
+1. free all heap memory that was allocated at any point
+
+
+### Data structures
+* two linked list structs (called docNode and wordNode)
+* a hashmap struct (called hashmap)
+
+## assumptions
+* documents of interest are all in the same directory
+
+### Function Headers
+
+#### int main()
+* calls createHashmap(), trainHashmap(), and readQuery
+
+#### struct hashmap* createHashmap(char* directory, glob_t* globPtr, int numBuckets);
+* assigns hashmap file pointer to results of glob
+* 
+
+#### struct hashmap* trainHashmap(struct hashmap* hashmapPtr, char* directory, glob_t* globPtr, int numBuckets );
+* calls 
+
+#### void hash_table_insert(struct hashmap* hashmapPtr, char* word, int docID);
+*
+
+#### struct wordNode* findWord(struct hashmap* hm, char* word, int insertMode);
+*
+
+#### void addDoc(struct wordNode* wordPtr, int docID);
+*
+
+#### void stop_word(struct hashmap* hm, int numDocs);
+*
+
+#### int hm_get(struct hashmap* hm, char* word, char* document_id);
+*
+
+#### void hm_put(struct hashmap* hm, char* word, char* document_id, int num_occurrences);
+*
+
+#### void removeWord(struct hashmap* hm, struct wordNode* trailingPtr, struct wordNode* Ptr);
+*
+
+#### void freeWord(struct wordNode* wordPtr);
+* clears memory from ...
+* called in hmDestroy
+
+#### void hmDestroy(struct hashmap* hm);
+*
+
+#### int hash(int numBuckets, char* word);
+*
+#### void rank(struct hashmap* hm, int numFiles, int querySize, char** query);
+
+#### int readQuery(struct hashmap* mapStructPtr, int numFiles);
+
+#### double tfidfCalc(struct wordNode* wordPtr, int docID, int numFiles);
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+The term frequency-inverse document frequency (tf-idf) method is one of the most common weighting algorithms used in many information retrieval systems as well as in many Natural language processing (NLP) systems. This starts with a bag of words (BOW) model – the query is represented by the occurrence counts of each word in the query (which means the order is lost – for example, “john is quicker than mary” and “mary is quicker than john” both have the same representation in this model). Thus a query of size m can be viewed as a set of m search terms/words w1, w2,...wm and the bag of words model vectorizes this query string by counting how many times each word appears in the document.
+
 
 Hashmap vs Hashtable
 https://www.geeksforgeeks.org/differences-between-hashmap-and-hashtable-in-java/
@@ -10,13 +115,6 @@ Key = word+documentID asccii sum
 Value = number of occurences of the word in that document
 
 This hashmap will free memory automatically when nodes are removed to prevent memory leaks and maintain performance over time.
-
-
-To Do 
-* read through specs and powerpoint on project 5
-* make testing suite that uses fileIO to accomplish operations that search engine would need (test each scenario layed out below for each method)
-
-* compare this algorithm to page rank algorithm
 
 
 * in put method: efficiency gain by adding new node to front instead of back? 
@@ -48,7 +146,7 @@ Each value is assigned a key
 The key is input into a hashing function which places the key in a bucket out of N buckets
 The key value pair is then added to the end of the linked list at that bucket
 
-A collision, or more specifically, a hash code collision in a HashMap, is a situation where two or more key objects produce the same final hash value and hence point to the same bucket location or array index.
+A collision, or more specifically, a hash code collision in a HashMap, is a situation where two or more key objects produce the same final hash value and hence point to the same bucket location or array index.
 
 ## Bug note 
 After completing each method and writing a simple test case I ran Valgrind to check for memory leaks. While I did not have any leaks I did have 3 invalid read errors which led to a segmentation fault. I realized quickly that 1.) I did not set the pointer to the word and document id passed in as a parameter to NULL in the remove method. This means the pointers to the word and  , the pointer to the word
@@ -235,10 +333,6 @@ The overall document rank for all words in the search query is the sum of ranks 
 
     *if there is punctuation next to a word it doesn't recognize just the word
 
-What to submit
-* the source code files on github with function header documentation
-* the makefile, and (3) 
-* documentation 
 
 Documentation includes 
 * description of your implementation 

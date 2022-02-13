@@ -1,0 +1,8 @@
+
+Query:
+gw 
+
+Document Rankings:
+testFiles/D1.txt    1.098612
+testFiles/D2.txt    0.000000
+testFiles/D3.txt    0.000000
