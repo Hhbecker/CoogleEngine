@@ -14,7 +14,7 @@ Meet Coogle: my C implementation of a search engine backend.
 
 if the search phrase is “computer architecture GW”, you need to find the .txt files that contain at least some of the words in the query and then rank the files in order of relevance. The most relevant files would be ranked first, and the least relevant file would be ranked last.
 
-<img src="images/mem.png" width="500px" height="670px">
+<img src="images/docs.png" width="500px" height="670px">
 
 
 ### Training Phase
