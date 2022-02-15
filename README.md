@@ -6,19 +6,21 @@ Meet Coogle: my C implementation of a search engine backend.
 * read design doc and write an explanation of what this thing is supposed to do and how it's supposed to do it
 * once you understand the hashmap data structure thoroughly then go comment all the code and make edits
 
-* comment
-* develop and run test suite
-* write readme
-* make a logging function that saves all inputs and output to file for debugging info (typescript)
+* comment training, queryhandling, then back to destroy in driver
+* add bucket calculation feature (or don't and just hardcode buckets)
+* test it and include example output
+* polish readme
+
+### Assumptions, weaknesses, and possible additional features
 * make a list of stop words and check each word against the stop word list before you search the hashmap for it
 
-## The goal 
+## The Goal 
 Say we have a large directory of text files and we need to find files of interest that contain certain words or phrases. Looking through each file would be incredibly time consuming. How could we rank the files by their relevance to a certain search phrase? 
 
 The solution is split into three phases:
-1. Training Phase
-2. Search Phase
-3. Destroy Phase
+1. **Training Phase**
+2. **Search Phase**
+3. **Destroy Phase**
 
 To rank documents by their relevance to a search query we will first organize the data into an efficently searchable structure (Training Phase). Next, we will search organized data using a popular ranking algorithm (Search Phase). Finally, to prevent memory leaks all allocated memory will be freed before the user exits the program (Destroy Phase).
 
@@ -37,7 +39,6 @@ To rank documents by their relevance to a search query we will first organize th
 1. Iterate through each hashmap linked list to free all memory allocated for linked list nodes.
 2. Free memory allocated for the hashmap struct itself.
 3. Exit program.
-
 
 Now let's take a look at the ranking algorithm we'll use to determine which documents are most relevant:
 
@@ -69,29 +70,11 @@ If no documents contain the word then df(w)=0 so 1 must be added to the denomina
 
 The tf-idf ranking scores are printed to a file in the same directory as the program. The file is named `searchScores.txt` and it will contain the filename:score for your query on each document in descending order (delimited by new lines).
 
-## Data structures/implementation 
+
+## Hashmap Implementation
 Hashmaps are an efficiently searchable organization of data. The hash map implemented here contains a linked list of words with a linked list of documents containing that word coming off of each word node. The hashing function sums the ascii values of each character in a word and uses this value (mod num buckets) to place words in their respective buckets.
 
 <img src="images/hashmap.png">
-
-When a query is searched the rank function loops through each document and then loops through each word in the search query to calculate and sum the tf-idf score for each word for each document. The documents are then sorted by score to arrive at the final ranking.
-
-```
-Rank function{
-
-    For each document i in directory:
-        For each word w in search query:
-            •get linked list pointer to word node using findWord()
-            •calculate tf-idf for document i word w using tfidfCalc()
-            •add this tf-idf score to the sum of tf-idf scores for document i
-        }
-    }
-
-    Sort array of document scores in descending order to produce final ranking
-
-}
-```
-
 
 ```
 // defines hashmap struct
@@ -118,8 +101,36 @@ struct docNode {
         struct docNode* nextDoc; 
 };
 ```
+Figure n. These struct definitions describe the structs shown in the hashmap diagram above.
 
-## Example 
+### Loop Structure
+
+When a query is searched the rank function loops through each document and then loops through each word in the search query to calculate and sum the tf-idf score for each word for each document. The documents are then sorted by score to arrive at the final ranking.
+
+
+```
+Rank function{
+
+    For each document i in directory:
+        For each word w in search query:
+            •get linked list pointer to word node using findWord()
+            •calculate tf-idf for document i word w using tfidfCalc()
+            •add this tf-idf score to the sum of tf-idf scores for document i
+        }
+    }
+
+    Sort array of document scores in descending order to produce final ranking
+
+}
+```
+
+## Destroy Phase Considerations  
+To prevent memory leaks an exhaustive freeing of all allocated memory must be performed before the program terminates. This diagram shows the cases considered when developing code to deallocate all heap memory. Note the cases for the docNode linked list are the same as for the wordNode linked list (or for any linked list).
+
+<img src="images/freemem.png">
+
+
+## Example Input
 Lets say the directory to be searched contains the following documents and the search query is “computer architecture GW”.
 
 <img src="images/docs.png">
@@ -132,10 +143,14 @@ The search query is then represented by the occurrence counts of each word in th
 
 <img src="images/bagOfWords.png">
 
-## Freeing Memory  
-To prevent memory leaks an exhaustive freeing of all allocated memory must be performed before the program terminates. This diagram shows the cases considered when developing code to deallocate all heap memory. Note the cases for the docNode linked list are the same as for the wordNode linked list (or for any linked list).
+The hashmap and for loop structures described above are used to apply the BOW search phrase to the inverted index of words in documents.
 
-<img src="images/freemem.png">
+## Output
+
+
+
+
+
 
 
 
