@@ -10,94 +10,36 @@ Meet Coogle: my C implementation of a search engine backend.
 * develop and run test suite
 * write readme
 * make a logging function that saves all inputs and output to file for debugging info (typescript)
+* make a list of stop words and check each word against the stop word list before you search the hashmap for it
 
-## Big Picture 
-we need to find the .txt files that contain at least some of the words in the query and then rank the files in order of relevance. The most relevant files would be ranked first, and the least relevant file would be ranked last.
+## The goal 
+Say we have a large directory of text files and we need to find files of interest that contain certain words or phrases. Looking through each file would be incredibly time consuming. How could we rank the files by their relevance to a certain search phrase? 
 
-### Training Phase
-1. read in a directory containing text files from the user
-2. create a hashmap struct which will store all text data in a more searchable form 
-3. for each document in the directory add each word to the hashmap 
-    each word has a linked list coming off it which has a node for 
-    each document the word is in and the frequency of the word in that document 
-4. remove words that appear in all document? or maybe just remove stop words?
-    free memory of words you remove
+The solution is split into three phases:
+1. Training Phase
+2. Search Phase
+3. Destroy Phase
 
-Goal of training phase: create an inverted index (important concept in search algorithms)
+To rank documents by their relevance to a search query we will first organize the data into an efficently searchable structure (Training Phase). Next, we will search organized data using a popular ranking algorithm (Search Phase). Finally, to prevent memory leaks all allocated memory will be freed before the user exits the program (Destroy Phase).
 
+#### Training Phase
+1. Read in a directory containing text files from the user.
+2. Create a custom hashmap structure which will store all text data in a more searchable form. 
+3. Add each word to the hashmap along with the doucments the word appears in (and the frequency in each document).
+4. Remove words that appear in all documents to improve search efficiency
 
-Stop word protocol: remove all words present in all 3 documents 
+#### Search Phase 
+1. Read in a search query from user.
+2. For each document in the directory calculate a ranking score based on the words in the query.
+3. Save rankings to a file and display rankings to the user.
 
-### Search Phase 
-1. read in a search query from user
-2. for each word in the search query
-    find the word in the hashmap (if its present)
-    find the document rank for that word
-3. compile the docuemnt ranks for all words into an average document rank and return that
-
-
-### Destroy Phase
-1. free all heap memory that was allocated at any point
-
-
-### Data structures
-* two linked list structs (called docNode and wordNode)
-* a hashmap struct (called hashmap)
-
-## assumptions
-* documents of interest are all in the same directory
-
-### Function Headers
-
-#### int main()
-* calls createHashmap(), trainHashmap(), and readQuery
-
-#### struct hashmap* createHashmap(char* directory, glob_t* globPtr, int numBuckets);
-* assigns hashmap file pointer to results of glob
-* 
-
-#### struct hashmap* trainHashmap(struct hashmap* hashmapPtr, char* directory, glob_t* globPtr, int numBuckets );
-* calls 
-
-#### void hash_table_insert(struct hashmap* hashmapPtr, char* word, int docID);
-*
-
-#### struct wordNode* findWord(struct hashmap* hm, char* word, int insertMode);
-*
-
-#### void addDoc(struct wordNode* wordPtr, int docID);
-*
-
-#### void stop_word(struct hashmap* hm, int numDocs);
-*
-
-#### int hm_get(struct hashmap* hm, char* word, char* document_id);
-*
-
-#### void hm_put(struct hashmap* hm, char* word, char* document_id, int num_occurrences);
-*
-
-#### void removeWord(struct hashmap* hm, struct wordNode* trailingPtr, struct wordNode* Ptr);
-*
-
-#### void freeWord(struct wordNode* wordPtr);
-* clears memory from ...
-* called in hmDestroy
-
-#### void hmDestroy(struct hashmap* hm);
-*
-
-#### int hash(int numBuckets, char* word);
-*
-#### void rank(struct hashmap* hm, int numFiles, int querySize, char** query);
-
-#### int readQuery(struct hashmap* mapStructPtr, int numFiles);
-
-#### double tfidfCalc(struct wordNode* wordPtr, int docID, int numFiles);
+#### Destroy Phase
+1. Iterate through each hashmap linked list to free all memory allocated for linked list nodes.
+2. Free memory allocated for the hashmap struct itself.
+3. Exit program.
 
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////
+Now let's take a look at the ranking algorithm we'll use to determine which documents are most relevant:
 
 ## The term frequency-inverse document frequency (tf-idf) page rank algorithm
 
@@ -126,23 +68,6 @@ idf(w) = log (N / df(w))
 If no documents contain the word then df(w)=0 so 1 must be added to the denominator of the above equation to handle the divide by zero case. For this case idf(w) = log (N/(1). The natural logarithm is used, instead of just N/df(w) to dampen the effect of idf (The natural log could be replaced by any base). If the natural log was not taken the idf would have a much greater effect than the tf on the tf-idf ranking.
 
 The tf-idf ranking scores are printed to a file in the same directory as the program. The file is named `searchScores.txt` and it will contain the filename:score for your query on each document in descending order (delimited by new lines).
-
-
-## Example 
-Lets say the directory to be searched contains the following documents and the search query is “computer architecture GW”.
-<img src="images/docs.png">
-
-The hashmap data structure is created to store an inverted index of the document contents. Though not shown in the table, the frequency of a given word in a given document is stored alongside the document itself.
-
-<img src="images/invertedIndex.png">
-
-The search query is then represented by the occurrence counts of each word in the query. This is called the bag of words (BOW) model. The order is lost – for example, “john is quicker than mary” and “mary is quicker than john” both have the same representation in the BOW model. Thus a query of size m can be viewed as a set of m search terms/words w1, w2,...wm and the bag of words model vectorizes this query string by counting how many times each word appears in the document.
-
-<img src="images/bagOfWords.png">
-
-
-
-
 
 ## Data structures/implementation 
 Hashmaps are an efficiently searchable organization of data. The hash map implemented here contains a linked list of words with a linked list of documents containing that word coming off of each word node. The hashing function sums the ascii values of each character in a word and uses this value (mod num buckets) to place words in their respective buckets.
@@ -194,6 +119,18 @@ struct docNode {
 };
 ```
 
+## Example 
+Lets say the directory to be searched contains the following documents and the search query is “computer architecture GW”.
+
+<img src="images/docs.png">
+
+The hashmap data structure is created to store an inverted index of the document contents. Though not shown in the table, the frequency of a given word in a given document is stored alongside the document itself.
+
+<img src="images/invertedIndex.png">
+
+The search query is then represented by the occurrence counts of each word in the query. This is called the bag of words (BOW) model. The order is lost – for example, “john is quicker than mary” and “mary is quicker than john” both have the same representation in the BOW model. Thus a query of size m can be viewed as a set of m search terms/words w1, w2,...wm and the bag of words model vectorizes this query string by counting how many times each word appears in the document.
+
+<img src="images/bagOfWords.png">
 
 ## Freeing Memory  
 To prevent memory leaks an exhaustive freeing of all allocated memory must be performed before the program terminates. This diagram shows the cases considered when developing code to deallocate all heap memory. Note the cases for the docNode linked list are the same as for the wordNode linked list (or for any linked list).
