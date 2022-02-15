@@ -9,17 +9,10 @@ Meet Coogle: my C implementation of a search engine backend.
 * comment
 * develop and run test suite
 * write readme
+* make a logging function that saves all inputs and output to file for debugging info (typescript)
 
 ## Big Picture 
-
-if the search phrase is “computer architecture GW”, you need to find the .txt files that contain at least some of the words in the query and then rank the files in order of relevance. The most relevant files would be ranked first, and the least relevant file would be ranked last.
-
-<img src="images/docs.png">
-
-<img src="images/invertedIndex.png">
-
-<img src="images/bagOfWords.png">
-
+we need to find the .txt files that contain at least some of the words in the query and then rank the files in order of relevance. The most relevant files would be ranked first, and the least relevant file would be ranked last.
 
 ### Training Phase
 1. read in a directory containing text files from the user
@@ -106,8 +99,110 @@ Stop word protocol: remove all words present in all 3 documents
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+## The term frequency-inverse document frequency (tf-idf) page rank algorithm
 
-The term frequency-inverse document frequency (tf-idf) method is one of the most common weighting algorithms used in many information retrieval systems as well as in many Natural language processing (NLP) systems. This starts with a bag of words (BOW) model – the query is represented by the occurrence counts of each word in the query (which means the order is lost – for example, “john is quicker than mary” and “mary is quicker than john” both have the same representation in this model). Thus a query of size m can be viewed as a set of m search terms/words w1, w2,...wm and the bag of words model vectorizes this query string by counting how many times each word appears in the document.
+The term frequency-inverse document frequency (tf-idf) method is one of the most common weighting algorithms used in many information retrieval systems as well as in many Natural language processing (NLP) systems. 
+
+A search query submitted by a user of the search engine typically consists of a number of words/terms. Therefore, we have to determine the relevance, or rank, of the document for the entire search phrase consisting of some m number of words w1, w2....wm , using the tf-idf scores for each word. The relevance, or rank, Ri of document i for this search phrase consisting of m words, is defined as the sum of the tf-idf scores for each of the m words.
+
+The tf-idf score gives us a measure of how important a word is to a document among a set of documents. It uses local term frequency (occurences of a word within a single document) and global inverse document frequency (inverse of occurences of the word across documents) to scale down the score of common terms and scale up the score of rare terms.
+
+The tf-idf(w,i) weight of a term (word) w in document i is the product of its term frequency tf(w,i) and inverse document frequency idf(w).
+
+tf-idf(w,i) = tf(w,i) × idf(w)
+
+The tf-idf(i) rank of a document i is the sum of the tf-idf scores for each of the m words in the search query.
+
+tf-idf(i) = tf-idf(w1,i) + tf-idf(w2,i) + tf-idf(w3,i) + ... + tf-idf(wm,i)
+
+#### Term Frequency (tf): 
+The term frequency tf(w,i) of a term (word) w in document i is the raw frequency of the word in the document. There are variations of term frequency that are used in different search algorithms; for example, since raw frequency may not always relate to relevance they divide the frequency by the number of words in the document to get a normalized raw frequency.
+
+#### Inverse Document Frequency (idf): 
+Many times a rare term/word is more informative than frequent terms. Stop words (such as “the” “for” etc.) appear often and usually are not very informative as to the relevance of a document. The inverse document frequency idf(w) considers how frequent the word occurs across the documents being searched. It is the natural log of the number of documents in the direcory being searched (N) divided by the document frequency df(w) which is the number of documents that contain the word w.
+
+idf(w) = log (N / df(w))
+
+If no documents contain the word then df(w)=0 so 1 must be added to the denominator of the above equation to handle the divide by zero case. For this case idf(w) = log (N/(1). The natural logarithm is used, instead of just N/df(w) to dampen the effect of idf (The natural log could be replaced by any base). If the natural log was not taken the idf would have a much greater effect than the tf on the tf-idf ranking.
+
+The tf-idf ranking scores are printed to a file in the same directory as the program. The file is named `searchScores.txt` and it will contain the filename:score for your query on each document in descending order (delimited by new lines).
+
+
+## Example 
+Lets say the directory to be searched contains the following documents and the search query is “computer architecture GW”.
+<img src="images/docs.png">
+
+The hashmap data structure is created to store an inverted index of the document contents. Though not shown in the table, the frequency of a given word in a given document is stored alongside the document itself.
+
+<img src="images/invertedIndex.png">
+
+The search query is then represented by the occurrence counts of each word in the query. This is called the bag of words (BOW) model. The order is lost – for example, “john is quicker than mary” and “mary is quicker than john” both have the same representation in the BOW model. Thus a query of size m can be viewed as a set of m search terms/words w1, w2,...wm and the bag of words model vectorizes this query string by counting how many times each word appears in the document.
+
+<img src="images/bagOfWords.png">
+
+
+
+
+
+## Data structures/implementation 
+Hashmaps are an efficiently searchable organization of data. The hash map implemented here contains a linked list of words with a linked list of documents containing that word coming off of each word node. The hashing function sums the ascii values of each character in a word and uses this value (mod num buckets) to place words in their respective buckets.
+
+<img src="images/hashmap.png">
+
+When a query is searched the rank function loops through each document and then loops through each word in the search query to calculate and sum the tf-idf score for each word for each document. The documents are then sorted by score to arrive at the final ranking.
+
+```
+Rank function{
+
+    For each document i in directory:
+        For each word w in search query:
+            •get linked list pointer to word node using findWord()
+            •calculate tf-idf for document i word w using tfidfCalc()
+            •add this tf-idf score to the sum of tf-idf scores for document i
+        }
+    }
+
+    Sort array of document scores in descending order to produce final ranking
+
+}
+```
+
+
+```
+// defines hashmap struct
+struct hashmap {
+        struct wordNode** pointerArray;
+        int num_buckets;
+        int numFiles;
+        char** fileNames;
+};
+
+// defines word linked list struct
+struct wordNode {
+        char* word;
+        int docFrequency;
+        struct wordNode* nextWord;
+        struct docNode* docList;
+};
+
+// defines document linked list struct
+struct docNode {
+        int docID;
+        int termFrequency;
+        double* tfidf;
+        struct docNode* nextDoc; 
+};
+```
+
+
+## Freeing Memory  
+To prevent memory leaks an exhaustive freeing of all allocated memory must be performed before the program terminates. This diagram shows the cases considered when developing code to deallocate all heap memory. Note the cases for the docNode linked list are the same as for the wordNode linked list (or for any linked list).
+
+<img src="images/freemem.png">
+
+
+
+----------------------------------------------
 
 
 Hashmap vs Hashtable
