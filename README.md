@@ -29,7 +29,7 @@ To rank documents by their relevance to a search query we will first organize th
 
 Now let's take a look at the ranking algorithm we'll use to determine which documents are most relevant:
 
-## The term frequency-inverse document frequency (tf-idf) page rank algorithm
+## Term Frequency-Inverse Document Frequency (TF-IDF) page rank algorithm
 
 The term frequency-inverse document frequency (tf-idf) method is one of the most common weighting algorithms used in many information retrieval systems as well as in many Natural language processing (NLP) systems. 
 
@@ -59,10 +59,11 @@ If no documents contain the word then df(w)=0 so 1 must be added to the denomina
 The tf-idf ranking scores are printed to a file in the same directory as the program. The file is named `searchScores.txt` and it will contain the filename:score for your query on each document in descending order (delimited by new lines).
 
 ## Hashmap Implementation
-Hashmaps are an efficiently searchable organization of data. The hash map implemented here contains a linked list of words with a linked list of documents containing that word coming off of each word node. The hashing function sums the ascii values of each character in a word and uses this value (mod num buckets) to place words in their respective buckets.
+Hashmaps are an efficiently searchable organization of data. The hashmap implemented here contains a linked list of words with a linked list of documents containing that word coming off of each word node. The hashing function sums the ascii values of each character in a word and uses this value (mod num buckets) to place words in their respective buckets.
 
 <img src="images/hashmap.png">
-Figure 1. ...
+Figure 1. Diagram of hashmap containing linked lists of linked lists.
+
 
 ```
 // defines hashmap struct
@@ -109,7 +110,7 @@ Rank function{
     Sort array of document scores in descending order to produce final ranking
 }
 ```
-Figure 3. ...
+Figure 3. Loop structure for the rank() method.
 
 ## Destroy Phase Considerations  
 To prevent memory leaks an exhaustive freeing of all allocated memory must be performed before the program terminates. This diagram shows the cases considered when developing code to deallocate all heap memory. Note the cases for the docNode linked list are the same as for the wordNode linked list (or for any linked list).
@@ -121,28 +122,22 @@ Figure 4. This figure shows the considered cases when developing the freeWord() 
 Lets say the directory to be searched contains the following documents and the search query is “computer architecture GW”.
 
 <img src="images/docs.png">
-Figure 5. Example file contents.
 
 The hashmap data structure is created to store an inverted index of the document contents. Though not shown in the table, the frequency of a given word in a given document is stored alongside the document itself.
 
 <img src="images/invertedIndex.png">
-Figure 6. A representation of an inverted index.
 
 The search query is then represented by the occurrence counts of each word in the query. This is called the bag of words (BOW) model. The order is lost – for example, “john is quicker than mary” and “mary is quicker than john” both have the same representation in the BOW model. Thus a query of size m can be viewed as a set of m search terms/words w1, w2,...wm and the bag of words model vectorizes this query string by counting how many times each word appears in the document.
 
 <img src="images/bagOfWords.png">
-Figure 7. The search query represented in the Bag of Words model.
 
 The hashmap and for loop structures described above are used to apply the BOW search phrase to the inverted index of words in documents.
 
-#### Design Tradeoff: 
+### Design Tradeoff: 
 1. calculate and store idf during training for each word 
 2. compare docFrequency and numFiles during training
 
 Often there will be many more words throughout the documents than there will be words in the search query. For every word that is in both the documents and the search query you require four calculations for option two. and for every word that is in the documents but not in the search query you save two calculations. Therefore, if the search query is half as long as the documents the methods are equal but as the documents grow larger than twice the search query method two becomes more efficient. 
-
-## Testing Instructions
-To test clone the repo and `cd` into the SRC directory. Run `make` and then `./search` and folllow the prompts. The output file will be called search_scores.txt.
 
 ### Weaknesses
 * adding a space after the input of the search query breaks the readQuery function
@@ -150,6 +145,9 @@ To test clone the repo and `cd` into the SRC directory. Run `make` and then `./s
 * if a word appears in all documents its deleted but it should be deleted only if it shows up in the same amounts in each document
 * if there is punctuation next to a word it doesn't recognize just the word (there is not partial word matching)
 * empty documents might crash trainHashmap()
+
+### Testing Instructions
+To test clone the repo and `cd` into the SRC directory. Run `make` and then `./search` and folllow the prompts. The output file will be called search_scores.txt.
 
 #### References
 Some references for more information on tf-idf method for document retrieval.
