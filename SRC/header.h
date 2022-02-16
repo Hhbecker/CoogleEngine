@@ -29,7 +29,7 @@ struct hashmap {
 
 // defines each function performed by a hashmap instance 
 // this acts as an interface that is then implemented in another file
-struct hashmap* trainHashmap(struct hashmap* hashmapPtr, char* directory, glob_t* globPtr);
+struct hashmap* trainHashmap(struct hashmap* hashmapPtr, glob_t* globPtr);
 void hash_table_insert(struct hashmap* hashmapPtr, char* word, int docID);
 struct wordNode* findWord(struct hashmap* hm, char* word, int insertMode);
 void addDoc(struct wordNode* wordPtr, int docID);

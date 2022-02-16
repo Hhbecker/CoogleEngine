@@ -19,8 +19,8 @@
 ///////////////////////////////////////////////////////////////
 
 // hm_create: allocates space for a new hashmap struct using the specified number of buckets
-// input: number of buckets in the hashmap
-// returns: pointer to a hashmap struct
+// inputs: a char pointer to the directory to be searched, a glob ptr, and the number of buckets
+// returns: pointer to a hashmap struct with a pointer to the list of filenames 
 struct hashmap* createHashmap(char* directory, glob_t* globPtr, int numBuckets){ 
 
     // NULL check globPtr input
@@ -60,29 +60,30 @@ struct hashmap* createHashmap(char* directory, glob_t* globPtr, int numBuckets){
 
 }
 
-// trainHashmap: 
-// inputs:
+// trainHashmap: creates a linked list node for each unique word and add a document linked list containing the frequency per document for that word
+// inputs: pointer to the hashmap, 
 // returns: the populated hash table (if parameters are valid)
-struct hashmap* trainHashmap(struct hashmap* hashmapPtr, char* directory, glob_t* globPtr){
+struct hashmap* trainHashmap(struct hashmap* hashmapPtr, glob_t* globPtr){
 
-    // confirm inputs are not NULL
-    if(!(hashmapPtr || directory || globPtr)){
+    // NULL check inputs
+    if(!(hashmapPtr || globPtr)){
         printf("passing NULL pointers into training function: returning NULL\n");
         return NULL;
     }
 
-    // iterate through words in documents and call hash_table_insert
+    // iterate through each document and each word in each document 
     for(int i=0; i<hashmapPtr->numFiles; i++){
         // create file pointer from file name char string
         FILE* filePtr = fopen(globPtr->gl_pathv[i], "r"); // result.gl_pathv is an array of file names
 
-        // this creates a char array of size 1023 because no word will be more than 1023 characters
+        // create a buffer to hold the fscanf() input from stdin (char array of size 1023 because no word will be more than 1023 characters)
         char buf[1023]; 
 
-        // while fscanf does not throw an error
+        // while fscanf does not throw an error or reach a newline
+        // scan words at a time
         while(fscanf(filePtr, "%s", buf)==1){
             // the buf variable contains the character string of the next word being scanned in
-            //printf("File: %s, word:'%s'\n", globPtr->gl_pathv[i], buf);
+            // add the word to the hashmap 
             hash_table_insert(hashmapPtr, buf, i);
         }
 
@@ -90,19 +91,19 @@ struct hashmap* trainHashmap(struct hashmap* hashmapPtr, char* directory, glob_t
         fclose(filePtr);
     }
 
-    // 8. Remove stop words
+    // At this point all unique words from all documents have been added to the hashmap
+    // Remove stop words
     stop_word(hashmapPtr, hashmapPtr->numFiles);  
 
     return hashmapPtr;
 }
 
-// hash_table_insert: hashes word and creates new node for the word or updates existing document frequency for that word and document combo
-
-// input:
-// returns:
+// hash_table_insert: hashes a word then creates new node for the word or updates existing document frequency for that word and document combo
+// input: hashmap pointer, word to be added, document in which the word was found
+// returns: void
 void hash_table_insert(struct hashmap* hm, char* word, int docID){
 
-    // 1. null check 
+    // NULL check inputs
     if(!(hm) || !(word)){
         printf("passing NULL pointers into insert function: returning\n");
         return;
@@ -113,8 +114,10 @@ void hash_table_insert(struct hashmap* hm, char* word, int docID){
     }
 
     // returns pointer to a wordNode containing the word just passed into insert
+    // if in insert mode a new word node will be created if one does not exist
     struct wordNode* wordPtr = findWord(hm, word, 1); // 1 for insert mode
 
+    // creates new docNode if one is not already present or updates existing node frequency
     addDoc(wordPtr, docID);
 
     return;
@@ -122,13 +125,20 @@ void hash_table_insert(struct hashmap* hm, char* word, int docID){
 }
 
 // addDoc: creates new docNode if doc not in list or adds to num occurences of existing docNode
-
+// inputs: pointer to word node in hashmap, ID of document in question
+// returns: void
 void addDoc(struct wordNode* wordPtr, int docID){
-    // null check
+    // NULL check inputs
     if(!(wordPtr)|| (docID<0)){
         printf("Passing NULL or invalid parameters into addDoc\n");
         return;
     }
+
+    // There are three cases: 
+    // 1. docList is not initialized for that word (initialize docNode list)
+    // 2. docList is initialized and the docID is found (increment num occurences)
+    // 3. docList is initialized and the docID is not found (create new docNode)
+
     // 1. docList not initialized
     if(!wordPtr->docList){
         //printf("word '%s' does not have a docList - initializing now\n", wordPtr->word);
@@ -189,6 +199,11 @@ void addDoc(struct wordNode* wordPtr, int docID){
 
 }
 
+
+// stop_Word: searches through every word node and checks if its docFrequency is equal to the number of files (making it a stop word)
+// if so it removes that word node and its document linked list from the hashmap
+// inputs: pointer to word node in hashmap, ID of document in question
+// returns: void
 void stop_word(struct hashmap* hm, int numFiles){
 
     // Null check
@@ -238,18 +253,20 @@ void stop_word(struct hashmap* hm, int numFiles){
 }
 
 
-// remove: frees all memory allocated for linked list node and reconnects the list if necessary
-// input: pointer to hashmap struct, pointers to the node key
+// removeWord: frees all memory allocated for a wordNode and its associated docList nodes
+// input: pointer to hashmap struct, pointers to the node to be removed and another pointer to the word node before it
 // returns: void
 void removeWord(struct hashmap* hm, struct wordNode* trailingPtr, struct wordNode* Ptr){
-        // old parameters: struct hashmap* hm, char* word, char* document_id
+
+    // null check inputs
     if(!(trailingPtr || Ptr)){
         printf("Passing NULL pointers into remove: returning\n");
     }
         
-    // potential issue may be an invalid way to compare pointers
-    if (Ptr==trailingPtr) // the target node is first in the list
+    // if the target node is first in the list
+    if (Ptr==trailingPtr) 
     {
+        // get index of bucket 
         int index=hash(hm->num_buckets, Ptr->word);
 
             if (Ptr->nextWord) // the target node has a node following it
@@ -287,8 +304,11 @@ void removeWord(struct hashmap* hm, struct wordNode* trailingPtr, struct wordNod
     return;
 }
 
+// freeWord: frees the docNode structs associated with the wordNode and then frees the wordNode
+// inputs: pointer to word node being freed
+// returns: void
 void freeWord(struct wordNode* wordPtr){
-    // 1. walk down document list 
+    // walk down document list 
     // free docList ptr
     // free each nextDoc ptr 
     if(!wordPtr->docList){
@@ -311,8 +331,7 @@ void freeWord(struct wordNode* wordPtr){
 
     }
 
-    // 2. free each necessary word struct data
-    // free word string
+    // 2. free wordNode struct data
 
     free(wordPtr->word);
 
@@ -322,8 +341,9 @@ void freeWord(struct wordNode* wordPtr){
     return;
 }
 
-// pass in the pointerArray[index] pointer
-// 
+// findWord: hash the word then iterate through the associated linked list to see if the word is present in a wordNode in the hashmap
+// if the function is called with the insertMode flag it will insert a word that is not already present
+// inputs: pointer to hashmap, pointer to char array containing the word, flag for insert mode or search mode
 // returns: pointer to the word in question (returns NULL if on retrive mode and word does not exist)
 struct wordNode* findWord(struct hashmap* hm, char* word, int insertMode){
 
@@ -400,7 +420,7 @@ struct wordNode* findWord(struct hashmap* hm, char* word, int insertMode){
 
 // hash: sums ascii characters to assign word and doc ID to a bucket
 // input: pointer to hashmap struct, pointer to a word, pointer to a doc ID
-// returns: 
+// returns: index of bucket where word should be placed in hashmap
 int hash(int numBuckets, char* word){
     // Null check parameters
     if(word){

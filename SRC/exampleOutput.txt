@@ -1,0 +1,24 @@
+
+Query:
+gw 
+
+Document Rankings:
+testFiles/D1.txt    1.098612
+testFiles/D2.txt    0.000000
+testFiles/D3.txt    0.000000
+
+Query:
+computer 
+
+Document Rankings:
+testFiles/D2.txt    0.810930
+testFiles/D1.txt    0.405465
+testFiles/D3.txt    0.000000
+
+Query:
+architecture 
+
+Document Rankings:
+testFiles/D1.txt    0.000000
+testFiles/D2.txt    0.000000
+testFiles/D3.txt    0.000000

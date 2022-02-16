@@ -15,13 +15,6 @@ This application is MIT licensed.
 
 #include "header.h"
 
-// Potentially not used 
-struct qeuryNode {
-    char* word;
-    struct queryNode* next; 
-};
-
-
 int main(void) {
 
     // skips user prompts for testing and debugging
@@ -45,7 +38,6 @@ int main(void) {
     // •Returns the length of the string that has been read
 
     // Why do we have to free(line)? After all, there are no malloc family functions in the above code?
-
     // The answer is that getline() allocates memory to the buffer (in the example above, line) as required.
 
     //////////////////// GET DIRECTORY NAME FROM USER SAVE AS STRING //////////////////
@@ -88,7 +80,6 @@ int main(void) {
     /////////////////// GET NUMBER OF TXT FILES IN DIR AND AVG SIZE TO CALCULATE NUMBER OF BUCKETS ////////////////
     // find number of .txt files and size of each file in bytes from OS
     // calculate best number of buckets 
-
     int numBuckets = 5;
 
     //////////////// TRAIN HASHMAP TO CALCULATE PRIORITY OF EACH DOC/WORD? /////////////
@@ -97,7 +88,7 @@ int main(void) {
     struct hashmap* hashmapPtr = createHashmap(directory, globPtr, numBuckets);
 
     // call training method
-    hashmapPtr = trainHashmap(hashmapPtr, directory, globPtr);
+    hashmapPtr = trainHashmap(hashmapPtr, globPtr);
 
     // sleep is happening before dots are written to stdout 
     printf("\n\nTRAINING HASHMAP");
@@ -115,7 +106,7 @@ int main(void) {
     
 }
 
-//destroy: frees all memory allocated by hashmap
+// destroy: frees all memory allocated by hashmap
 // input: pointer to hashmap struct
 //returns: void
 void hmDestroy(struct hashmap* hm){

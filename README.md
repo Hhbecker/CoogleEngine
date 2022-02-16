@@ -1,28 +1,15 @@
 # CoogleEngine
-Meet Coogle: my C implementation of a search engine backend.
-
-### To do
-
-* read design doc and write an explanation of what this thing is supposed to do and how it's supposed to do it
-* once you understand the hashmap data structure thoroughly then go comment all the code and make edits
-
-* comment training, queryhandling, then back to destroy in driver
-* add bucket calculation feature (or don't and just hardcode buckets)
-* test it and include example output
-* polish readme
-
-### Assumptions, weaknesses, and possible additional features
-* make a list of stop words and check each word against the stop word list before you search the hashmap for it
+Meet Coogle: a search engine for text files written in C.
 
 ## The Goal 
-Say we have a large directory of text files and we need to find files of interest that contain certain words or phrases. Looking through each file would be incredibly time consuming. How could we rank the files by their relevance to a certain search phrase? 
+Say we have a large directory of text files and we need to identify files that contain certain words or phrases. Looking through each file would be incredibly time consuming. How could we rank the files by their relevance to a certain search phrase? 
 
 The solution is split into three phases:
 1. **Training Phase**
 2. **Search Phase**
 3. **Destroy Phase**
 
-To rank documents by their relevance to a search query we will first organize the data into an efficently searchable structure (Training Phase). Next, we will search organized data using a popular ranking algorithm (Search Phase). Finally, to prevent memory leaks all allocated memory will be freed before the user exits the program (Destroy Phase).
+To rank documents by their relevance to a search query we will first organize the text data contained in all files into an efficently searchable structure (Training Phase). Next, we will search the organized text data using a popular ranking algorithm (Search Phase). Finally, to prevent memory leaks all allocated memory will be freed before the user exits the program (Destroy Phase).
 
 #### Training Phase
 1. Read in a directory containing text files from the user.
@@ -51,30 +38,31 @@ A search query submitted by a user of the search engine typically consists of a 
 The tf-idf score gives us a measure of how important a word is to a document among a set of documents. It uses local term frequency (occurences of a word within a single document) and global inverse document frequency (inverse of occurences of the word across documents) to scale down the score of common terms and scale up the score of rare terms.
 
 The tf-idf(w,i) weight of a term (word) w in document i is the product of its term frequency tf(w,i) and inverse document frequency idf(w).
-
+```
 tf-idf(w,i) = tf(w,i) × idf(w)
 
 The tf-idf(i) rank of a document i is the sum of the tf-idf scores for each of the m words in the search query.
 
 tf-idf(i) = tf-idf(w1,i) + tf-idf(w2,i) + tf-idf(w3,i) + ... + tf-idf(wm,i)
+```
 
 #### Term Frequency (tf): 
 The term frequency tf(w,i) of a term (word) w in document i is the raw frequency of the word in the document. There are variations of term frequency that are used in different search algorithms; for example, since raw frequency may not always relate to relevance they divide the frequency by the number of words in the document to get a normalized raw frequency.
 
 #### Inverse Document Frequency (idf): 
 Many times a rare term/word is more informative than frequent terms. Stop words (such as “the” “for” etc.) appear often and usually are not very informative as to the relevance of a document. The inverse document frequency idf(w) considers how frequent the word occurs across the documents being searched. It is the natural log of the number of documents in the direcory being searched (N) divided by the document frequency df(w) which is the number of documents that contain the word w.
-
+```
 idf(w) = log (N / df(w))
-
+```
 If no documents contain the word then df(w)=0 so 1 must be added to the denominator of the above equation to handle the divide by zero case. For this case idf(w) = log (N/(1). The natural logarithm is used, instead of just N/df(w) to dampen the effect of idf (The natural log could be replaced by any base). If the natural log was not taken the idf would have a much greater effect than the tf on the tf-idf ranking.
 
 The tf-idf ranking scores are printed to a file in the same directory as the program. The file is named `searchScores.txt` and it will contain the filename:score for your query on each document in descending order (delimited by new lines).
-
 
 ## Hashmap Implementation
 Hashmaps are an efficiently searchable organization of data. The hash map implemented here contains a linked list of words with a linked list of documents containing that word coming off of each word node. The hashing function sums the ascii values of each character in a word and uses this value (mod num buckets) to place words in their respective buckets.
 
 <img src="images/hashmap.png">
+Figure 1. ...
 
 ```
 // defines hashmap struct
@@ -101,10 +89,9 @@ struct docNode {
         struct docNode* nextDoc; 
 };
 ```
-Figure n. These struct definitions describe the structs shown in the hashmap diagram above.
+Figure 2. These struct definitions describe the structs shown in the hashmap diagram above.
 
 ### Loop Structure
-
 When a query is searched the rank function loops through each document and then loops through each word in the search query to calculate and sum the tf-idf score for each word for each document. The documents are then sorted by score to arrive at the final ranking.
 
 
@@ -120,32 +107,43 @@ Rank function{
     }
 
     Sort array of document scores in descending order to produce final ranking
-
 }
 ```
+Figure 3. ...
 
 ## Destroy Phase Considerations  
 To prevent memory leaks an exhaustive freeing of all allocated memory must be performed before the program terminates. This diagram shows the cases considered when developing code to deallocate all heap memory. Note the cases for the docNode linked list are the same as for the wordNode linked list (or for any linked list).
 
 <img src="images/freemem.png">
-
+Figure 4. This figure shows the considered cases when developing the freeWord() method.
 
 ## Example Input
 Lets say the directory to be searched contains the following documents and the search query is “computer architecture GW”.
 
 <img src="images/docs.png">
+Figure 5. ...
 
 The hashmap data structure is created to store an inverted index of the document contents. Though not shown in the table, the frequency of a given word in a given document is stored alongside the document itself.
 
 <img src="images/invertedIndex.png">
+Figure 6. ...
 
 The search query is then represented by the occurrence counts of each word in the query. This is called the bag of words (BOW) model. The order is lost – for example, “john is quicker than mary” and “mary is quicker than john” both have the same representation in the BOW model. Thus a query of size m can be viewed as a set of m search terms/words w1, w2,...wm and the bag of words model vectorizes this query string by counting how many times each word appears in the document.
 
 <img src="images/bagOfWords.png">
+Figure 7. ...
 
 The hashmap and for loop structures described above are used to apply the BOW search phrase to the inverted index of words in documents.
 
-## Output
+## Testing Instructions
+To test clone the repo and `cd` into the SRC directory. Run `make` and then `./search` and folllow the prompts. The output file will be called search_scores.txt.
+
+
+### Assumptions, weaknesses, and possible additional features
+* make a list of stop words and check each word against the stop word list before you search the hashmap for it
+* adding a space after the input of the search query breaks the readQuery function
+* its currently only using the first word in the query
+* if a word appears in all documents its deleted but it should be deleted only if it shows up in the same amounts in each document
 
 
 
