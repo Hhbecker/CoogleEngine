@@ -2,7 +2,7 @@
 Meet Coogle: a search engine for text files written in C.
 
 ## The Goal 
-Say we have a large directory of text files and we need to identify files that contain certain words or phrases. Looking through each file would be incredibly time consuming. How could we rank the files by their relevance to a certain search phrase? 
+Say we have a large directory of text files. We need to identify files of interest that contain certain words or phrases. Looking through each file would be incredibly time consuming. How could we programatically rank files by their relevance to a certain search phrase? 
 
 The solution is split into three phases:
 1. **Training Phase**
@@ -154,6 +154,6 @@ To test clone the repo and `cd` into the SRC directory. Run `make` and then `./s
 
 #### References
 Some references for more information on tf-idf method for document retrieval.
-● H. Wu and R. Luk and K. Wong and K. Kwok. "Interpreting TF-IDF term weights as making relevance
+* H. Wu and R. Luk and K. Wong and K. Kwok. "Interpreting TF-IDF term weights as making relevance
 decisions". ACM Transactions on Information Systems, 26 (3). 2008.
-● J. Ramos, “Using TF-IDF to determine word relevance in document queries”.
+* J. Ramos, “Using TF-IDF to determine word relevance in document queries”.
