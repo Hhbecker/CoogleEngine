@@ -146,6 +146,9 @@ Often there will be many more words throughout the documents than there will be 
 * if there is punctuation next to a word it doesn't recognize just the word (there is not partial word matching)
 * empty documents might crash trainHashmap()
 
+### Highlights 
+This was really my first big C project so there were a lot of C nuances that I had to learn along the way especially in the I/O department. I Thought working with double pointers was really cool and I enjoyed creating the hashmap of lists of lists.
+
 ### Testing Instructions
 To test clone the repo and `cd` into the SRC directory. Run `make` and then `./search` and folllow the prompts. The output file will be called search_scores.txt.
 
